@@ -21,6 +21,10 @@ package com.android.volley;
  */
 public interface Network {
     /**
+     * Set the request delivery that use to post http networking callbacks.
+     */
+    void setDelivery(ResponseDelivery delivery);
+    /**
      * Performs the specified request.
      * @param request Request to process
      * @return A {@link NetworkResponse} with data and caching metadata; will never be null

@@ -109,6 +109,7 @@ public class RequestQueue {
             ResponseDelivery delivery) {
         mCache = cache;
         mNetwork = network;
+        mNetwork.setDelivery(delivery);
         mDispatchers = new NetworkDispatcher[threadPoolSize];
         mDelivery = delivery;
     }

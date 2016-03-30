@@ -27,6 +27,7 @@ import com.android.volley.NetworkError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
+import com.android.volley.ResponseDelivery;
 import com.android.volley.RetryPolicy;
 import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
@@ -66,6 +67,11 @@ public class BasicNetwork implements Network {
     protected final ByteArrayPool mPool;
 
     /**
+     * Request delivery mechanism.
+     */
+    private ResponseDelivery mDelivery;
+
+    /**
      * @param httpStack HTTP stack to be used
      */
     public BasicNetwork(HttpStack httpStack) {
@@ -81,6 +87,11 @@ public class BasicNetwork implements Network {
     public BasicNetwork(HttpStack httpStack, ByteArrayPool pool) {
         mHttpStack = httpStack;
         mPool = pool;
+    }
+
+    @Override
+    public void setDelivery(ResponseDelivery delivery) {
+        mDelivery = delivery;
     }
 
     @Override
