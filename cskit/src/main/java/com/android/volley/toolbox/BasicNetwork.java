@@ -107,6 +107,7 @@ public class BasicNetwork implements Network {
                 addCacheHeaders(headers, request.getCacheEntry());
                 // preparing for this request, normally is reset the request headers.
                 request.prepare();
+                mDelivery.postPreExecute(request);
                 httpResponse = mHttpStack.performRequest(request, headers);
                 StatusLine statusLine = httpResponse.getStatusLine();
                 int statusCode = statusLine.getStatusCode();

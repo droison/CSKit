@@ -11,14 +11,14 @@ import java.util.LinkedList;
 /**
  * Created by song on 16/3/30.
  */
-public class DownloadManager {
+public class FileDownloadManager {
     private final RequestQueue mRequestQueue;
 
     private final int mParallelTaskCount;
 
     private final LinkedList<DownloadOperation> mTaskQueue;
 
-    public DownloadManager(RequestQueue queue, int parallelTaskCount) {
+    public FileDownloadManager(RequestQueue queue, int parallelTaskCount) {
         if (parallelTaskCount >= queue.getThreadPoolSize()) {
             throw new IllegalArgumentException("parallelTaskCount[" + parallelTaskCount
                     + "] must less than threadPoolSize[" + queue.getThreadPoolSize() + "] of the RequestQueue.");
