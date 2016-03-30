@@ -174,6 +174,9 @@ public class RequestQueue {
         return mSequenceGenerator.incrementAndGet();
     }
 
+    public int getThreadPoolSize() {
+        return mDispatchers.length;
+    }
     /**
      * Gets the {@link Cache} instance being used.
      */
