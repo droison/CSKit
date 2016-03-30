@@ -93,6 +93,7 @@ public class CacheDispatcher extends Thread {
                 // If the request has been canceled, don't bother dispatching it.
                 if (request.isCanceled()) {
                     request.finish("cache-discard-canceled");
+                    mDelivery.postCancel(request);
                     continue;
                 }
 

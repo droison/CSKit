@@ -18,6 +18,10 @@ package com.android.volley;
 
 public interface ResponseDelivery {
     /**
+     * Posts starting execute callback for the given request.
+     */
+    void postPreExecute(Request<?> request);
+    /**
      * Parses a response from the network or cache and delivers it.
      */
     public void postResponse(Request<?> request, Response<?> response);
@@ -32,4 +36,10 @@ public interface ResponseDelivery {
      * Posts an error for the given request.
      */
     public void postError(Request<?> request, VolleyError error);
+
+    void postCancel(final Request<?> request);
+    /**
+     * Posts file download progress stat.
+     */
+    void postDownloadProgress(Request<?> request, long fileSize, long downloadedSize);
 }

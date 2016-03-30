@@ -69,6 +69,38 @@ public class ExecutorDelivery implements ResponseDelivery {
         mResponsePoster.execute(new ResponseDeliveryRunnable(request, response, null));
     }
 
+    @Override
+    public void postDownloadProgress(final Request<?> request, final long fileSize, final long downloadedSize) {
+        request.addMarker("post-downloadprogress");
+        mResponsePoster.execute(new Runnable() {
+            @Override
+            public void run() {
+                request.deliverDownloadProgress(fileSize, downloadedSize);
+            }
+        });
+    }
+
+    @Override
+    public void postPreExecute(final Request<?> request) {
+        request.addMarker("post-preexecute");
+        mResponsePoster.execute(new Runnable() {
+            @Override
+            public void run() {
+                request.deliverPreExecute();
+            }
+        });
+    }
+
+    @Override
+    public void postCancel(final Request<?> request) {
+        request.addMarker("post-cancel");
+        mResponsePoster.execute(new Runnable() {
+            @Override
+            public void run() {
+                request.deliverCancel();
+            }
+        });
+    }
     /**
      * A Runnable used for delivering network responses to a listener on the
      * main thread.

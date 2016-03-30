@@ -103,6 +103,7 @@ public class NetworkDispatcher extends Thread {
                 // network request.
                 if (request.isCanceled()) {
                     request.finish("network-discard-cancelled");
+                    mDelivery.postCancel(request);
                     continue;
                 }
 

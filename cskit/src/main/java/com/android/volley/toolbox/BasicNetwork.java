@@ -105,6 +105,8 @@ public class BasicNetwork implements Network {
                 // Gather headers.
                 Map<String, String> headers = new HashMap<String, String>();
                 addCacheHeaders(headers, request.getCacheEntry());
+                // preparing for this request, normally is reset the request headers.
+                request.prepare();
                 httpResponse = mHttpStack.performRequest(request, headers);
                 StatusLine statusLine = httpResponse.getStatusLine();
                 int statusCode = statusLine.getStatusCode();
@@ -132,7 +134,7 @@ public class BasicNetwork implements Network {
 
                 // Some responses such as 204s do not have content.  We must check.
                 if (httpResponse.getEntity() != null) {
-                  responseContents = entityToBytes(httpResponse.getEntity());
+                  responseContents = request.isHandleResponse()? request.handleResponse(httpResponse, mDelivery) : entityToBytes(httpResponse.getEntity());
                 } else {
                   // Add 0 byte response as a way of honestly representing a
                   // no-content request.

@@ -23,10 +23,17 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import com.android.volley.VolleyLog.MarkerLog;
+import com.android.volley.toolbox.PoolingByteArrayOutputStream;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -106,6 +113,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     private Object mTag;
 
     /**
+     * The additional headers.
+     */
+    private HashMap<String, String> mHashHeaders;
+
+    /**
      * Creates a new request with the given URL and error listener.  Note that
      * the normal response listener is not provided here as delivery of responses
      * is provided by subclasses, who have a better idea of how to deliver an
@@ -131,6 +143,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         setRetryPolicy(new DefaultRetryPolicy());
 
         mDefaultTrafficStatsTag = findDefaultTrafficStatsTag(url);
+        mHashHeaders = new HashMap<>();
     }
 
     /**
@@ -302,6 +315,17 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     }
 
     /**
+     * Prepare to execute, invoke before {@link com.android.volley.toolbox.HttpStack#performRequest}.
+     * it's original purpose is reset some request parameters after timeout then retry, especially headers,
+     * the situation is when you have some headers need to init or reset every perform, for example the "Range"
+     * header for download a file, you obviously must retrieve the begin position of file and reset the "Range"
+     * for every time you going to retry, so that's why we add this method.
+     */
+    public void prepare() {
+    }
+
+
+    /**
      * Mark this request as canceled.  No callback will be delivered.
      */
     public void cancel() {
@@ -322,7 +346,28 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      * @throws AuthFailureError In the event of auth failure
      */
     public Map<String, String> getHeaders() throws AuthFailureError {
-        return Collections.emptyMap();
+        return mHashHeaders;
+    }
+
+    /**
+     * Put a Header to RequestHeaders.
+     *
+     * @param field header key
+     * @param value header value
+     */
+    public final void addHeader(String field, String value) {
+        // We don't accept duplicate header.
+        removeHeader(field);
+        mHashHeaders.put(field, value);
+    }
+
+    /**
+     * Remove a header from RequestHeaders
+     *
+     * @param field header key
+     */
+    public final void removeHeader(String field) {
+        mHashHeaders.remove(field);
     }
 
     /**
@@ -582,6 +627,38 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         if (mErrorListener != null) {
             mErrorListener.onErrorResponse(error);
         }
+    }
+
+    /**
+     * Delivers on Request start.
+     */
+    public void deliverPreExecute() {
+
+    }
+
+    /**
+     * Delivers request has truly cancelled to the Listener.
+     */
+    public void deliverCancel() {
+
+    }
+
+    /**
+     * Delivers when download request progress change to the Listener.
+     */
+    public void deliverDownloadProgress(long fileSize, long downloadedSize) {
+
+    }
+
+    /**
+     * Returns true if this request has had a response delivered for it.
+     */
+    public boolean isHandleResponse() {
+        return false;
+    }
+
+    public byte[] handleResponse(HttpResponse response, ResponseDelivery delivery) throws IOException, ServerError {
+        return new byte[0];
     }
 
     /**
