@@ -1,10 +1,9 @@
 package com.android.volley.filedownload;
 
-import android.os.Looper;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.ResponseDelivery;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -37,6 +36,11 @@ public class FileDownloadManager {
         mRequestQueue = queue;
         mRootDirectory = rootDirectory;
         mDelivery = defaultDelivery;
+        if (!mRootDirectory.exists()) {
+            if (!mRootDirectory.mkdirs()) {
+                VolleyLog.e("Unable to create cache dir %s", mRootDirectory.getAbsolutePath());
+            }
+        }
     }
 
     public FileDownloadManager(File rootDirectory, RequestQueue queue, ResponseDelivery defaultDelivery) {
