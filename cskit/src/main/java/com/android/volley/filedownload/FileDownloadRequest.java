@@ -39,7 +39,7 @@ class FileDownloadRequest extends Request<File>{
 
         // Turn the retries frequency greater.
         setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 200, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
+        setShouldCache(false);
     }
 
     @Override
@@ -71,6 +71,8 @@ class FileDownloadRequest extends Request<File>{
     public boolean isHandleResponse() {
         return true;
     }
+
+
     /**
      * In this method, we got the Content-Length, with the TemporaryFile length,
      * we can calculate the actually size of the whole file, if TemporaryFile not exists,

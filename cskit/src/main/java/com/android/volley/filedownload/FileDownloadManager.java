@@ -3,6 +3,7 @@ package com.android.volley.filedownload;
 import android.os.Looper;
 
 import com.android.volley.RequestQueue;
+import com.android.volley.ResponseDelivery;
 import com.android.volley.VolleyError;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.util.LinkedList;
 
 /**
  * Created by song on 16/3/30.
+ * 文件缓存不走默认的cache处理，只判断本地文件是否存在来处理
  */
 public class FileDownloadManager {
     private final RequestQueue mRequestQueue;
@@ -18,7 +20,13 @@ public class FileDownloadManager {
 
     private final LinkedList<DownloadOperation> mTaskQueue;
 
-    public FileDownloadManager(RequestQueue queue, int parallelTaskCount) {
+    private final ResponseDelivery mDelivery; //如果不设置 会默认回调回queue的delivery，如果queue不设置，就回回调主线程
+
+    private final File mRootDirectory; //默认存储位置
+
+    private static final int DEFAULT_PARALLEL_TASK_COUNT = 2;
+
+    public FileDownloadManager(File rootDirectory, RequestQueue queue, ResponseDelivery defaultDelivery, int parallelTaskCount) {
         if (parallelTaskCount >= queue.getThreadPoolSize()) {
             throw new IllegalArgumentException("parallelTaskCount[" + parallelTaskCount
                     + "] must less than threadPoolSize[" + queue.getThreadPoolSize() + "] of the RequestQueue.");
@@ -27,11 +35,20 @@ public class FileDownloadManager {
         mTaskQueue = new LinkedList<DownloadOperation>();
         mParallelTaskCount = parallelTaskCount;
         mRequestQueue = queue;
+        mRootDirectory = rootDirectory;
+        mDelivery = defaultDelivery;
     }
 
-    public DownloadOperation add(File storeFile, String url, FileDownloadListener listener) {
-        checkTaskThread();
+    public FileDownloadManager(File rootDirectory, RequestQueue queue, ResponseDelivery defaultDelivery) {
+        this(rootDirectory, queue, defaultDelivery, DEFAULT_PARALLEL_TASK_COUNT);
+    }
 
+    public FileDownloadManager(File rootDirectory, RequestQueue queue) {
+        this(rootDirectory, queue, null, DEFAULT_PARALLEL_TASK_COUNT);
+    }
+
+
+    public DownloadOperation add(File storeFile, String url, FileDownloadListener listener) {
         DownloadOperation controller = new DownloadOperation(storeFile, url, listener);
         synchronized (mTaskQueue) {
             mTaskQueue.add(controller);
@@ -40,8 +57,9 @@ public class FileDownloadManager {
         return controller;
     }
 
-    public DownloadOperation add(String storeFilePath, String url, FileDownloadListener listener) {
-        return add(new File(storeFilePath), url, listener);
+    //此处会调用默认存储位置
+    public DownloadOperation add(String url, FileDownloadListener listener) {
+        return add(null, url, listener);
     }
 
     public DownloadOperation get(File storeFile, String url) {
@@ -59,19 +77,19 @@ public class FileDownloadManager {
     }
 
     private void schedule() {
-        checkTaskThread();
         if (clearing)
             return;
+        synchronized (mTaskQueue) {
+            int parallelTaskCount = 0;
+            for (DownloadOperation controller : mTaskQueue) {
+                if (controller.isDownloading()) parallelTaskCount++;
+            }
+            if (parallelTaskCount >= mParallelTaskCount) return;
 
-        int parallelTaskCount = 0;
-        for (DownloadOperation controller : mTaskQueue) {
-            if (controller.isDownloading()) parallelTaskCount++;
-        }
-        if (parallelTaskCount >= mParallelTaskCount) return;
-
-        // try to deploy all Task if they're await.
-        for (DownloadOperation controller : mTaskQueue) {
-            if (controller.deploy() && ++parallelTaskCount == mParallelTaskCount) return;
+            // try to deploy all Task if they're await.
+            for (DownloadOperation controller : mTaskQueue) {
+                if (controller.deploy() && ++parallelTaskCount == mParallelTaskCount) return;
+            }
         }
     }
 
@@ -81,8 +99,10 @@ public class FileDownloadManager {
      * @param controller The controller which will be remove.
      */
     private void remove(DownloadOperation controller) {
-        checkTaskThread();
-        mTaskQueue.remove(controller);
+        // also make sure one thread operation
+        synchronized (mTaskQueue) {
+            mTaskQueue.remove(controller);
+        }
         schedule();
     }
 
@@ -91,30 +111,31 @@ public class FileDownloadManager {
      * 清理所有任务
      */
     public void clearAll() {
-        checkTaskThread();
         clearing = true;
-        while (!mTaskQueue.isEmpty()) {
-            mTaskQueue.get(0).discard();
+        // make sure only one thread can manipulate the Task Queue.
+        synchronized (mTaskQueue) {
+            while (!mTaskQueue.isEmpty()) {
+                mTaskQueue.get(0).discard();
+            }
         }
         clearing = false;
     }
 
-    /**
-     * 检测工作线程，强制下载的调用和回调线程在当前线程
-     */
-    private void checkTaskThread() {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw new IllegalStateException("FileDownloader must be invoked from the main thread.");
-        }
+    public FileDownloadRequest buildRequest(File storeFile, String url) {
+        FileDownloadRequest request = new FileDownloadRequest(storeFile == null? getDefaultCacheFile(url): storeFile, url);
+        request.setDelivery(mDelivery);
+        return request;
     }
 
-    public FileDownloadRequest buildRequest(File storeFile, String url) {
-        return new FileDownloadRequest(storeFile, url);
+    //没有传入默认位置会走这里
+    //外部也可以通过这种方式来判断缓存是否存在
+    public File getDefaultCacheFile(String url) {
+        return new File(mRootDirectory, HttpUtils.md5(url));
     }
 
     /**
      * This class included all such as PAUSE, RESUME, DISCARD to manipulating download task,
-     * it created by {@link #add(String, String, FileDownloadListener)},
+     * it created by {@link #add(File, String, FileDownloadListener)},
      * offer three params to constructing {@link FileDownloadRequest} then perform http downloading,
      * you can check the download status whenever you want to know.
      */
