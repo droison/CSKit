@@ -89,11 +89,14 @@ public class CacheDispatcher extends Thread {
                 // at least one is available.
                 final Request<?> request = mCacheQueue.take();
                 request.addMarker("cache-queue-take");
-
+                ResponseDelivery delivery = request.getDelivery();
+                if ( delivery == null) {
+                    delivery = mDelivery;
+                }
                 // If the request has been canceled, don't bother dispatching it.
                 if (request.isCanceled()) {
                     request.finish("cache-discard-canceled");
-                    mDelivery.postCancel(request);
+                    delivery.postCancel(request);
                     continue;
                 }
 
@@ -122,7 +125,7 @@ public class CacheDispatcher extends Thread {
 
                 if (!entry.refreshNeeded()) {
                     // Completely unexpired cache hit. Just deliver the response.
-                    mDelivery.postResponse(request, response);
+                    delivery.postResponse(request, response);
                 } else {
                     // Soft-expired cache hit. We can deliver the cached response,
                     // but we need to also send the request to the network for
@@ -135,7 +138,7 @@ public class CacheDispatcher extends Thread {
 
                     // Post the intermediate response back to the user and have
                     // the delivery then forward the request along to the network.
-                    mDelivery.postResponse(request, response, new Runnable() {
+                    delivery.postResponse(request, response, new Runnable() {
                         @Override
                         public void run() {
                             try {

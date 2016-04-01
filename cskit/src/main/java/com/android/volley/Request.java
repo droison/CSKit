@@ -118,6 +118,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     private HashMap<String, String> mHashHeaders;
 
     /**
+     * Set the request delivery that use to post http response callbacks.
+     * if null will use RequestQueue delivery
+     */
+    private ResponseDelivery mDelivery;
+    /**
      * Creates a new request with the given URL and error listener.  Note that
      * the normal response listener is not provided here as delivery of responses
      * is provided by subclasses, who have a better idea of how to deliver an
@@ -280,6 +285,14 @@ public abstract class Request<T> implements Comparable<Request<T>> {
             throw new IllegalStateException("getSequence called before setSequence");
         }
         return mSequence;
+    }
+
+    public ResponseDelivery getDelivery() {
+        return mDelivery;
+    }
+
+    public void setDelivery(ResponseDelivery mDelivery) {
+        this.mDelivery = mDelivery;
     }
 
     /**

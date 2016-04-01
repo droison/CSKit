@@ -95,7 +95,10 @@ public class NetworkDispatcher extends Thread {
                 }
                 continue;
             }
-
+            ResponseDelivery delivery = request.getDelivery();
+            if ( delivery == null) {
+                delivery = mDelivery;
+            }
             try {
                 request.addMarker("network-queue-take");
 
@@ -103,7 +106,7 @@ public class NetworkDispatcher extends Thread {
                 // network request.
                 if (request.isCanceled()) {
                     request.finish("network-discard-cancelled");
-                    mDelivery.postCancel(request);
+                    delivery.postCancel(request);
                     continue;
                 }
 
@@ -133,7 +136,7 @@ public class NetworkDispatcher extends Thread {
 
                 // Post the response back.
                 request.markDelivered();
-                mDelivery.postResponse(request, response);
+                delivery.postResponse(request, response);
             } catch (VolleyError volleyError) {
                 volleyError.setNetworkTimeMs(SystemClock.elapsedRealtime() - startTimeMs);
                 parseAndDeliverNetworkError(request, volleyError);
@@ -141,13 +144,17 @@ public class NetworkDispatcher extends Thread {
                 VolleyLog.e(e, "Unhandled exception %s", e.toString());
                 VolleyError volleyError = new VolleyError(e);
                 volleyError.setNetworkTimeMs(SystemClock.elapsedRealtime() - startTimeMs);
-                mDelivery.postError(request, volleyError);
+                delivery.postError(request, volleyError);
             }
         }
     }
 
     private void parseAndDeliverNetworkError(Request<?> request, VolleyError error) {
         error = request.parseNetworkError(error);
-        mDelivery.postError(request, error);
+        if (request.getDelivery() != null) {
+            request.getDelivery().postError(request, error);
+        } else {
+            mDelivery.postError(request, error);
+        }
     }
 }
