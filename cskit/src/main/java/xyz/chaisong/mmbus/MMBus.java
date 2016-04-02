@@ -15,9 +15,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import xyz.chaisong.mmservicecenter.MMService;
+import xyz.chaisong.mmanagercenter.MManager;
 
-public class MMBus extends MMService {
+public class MMBus extends MManager {
 
     private static MMBus strictBus;
 
