@@ -3,7 +3,6 @@ package com.android.volley.filedownload;
 import com.android.volley.RequestQueue;
 import com.android.volley.ResponseDelivery;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -21,11 +20,11 @@ public class FileDownloadManager {
 
     private final ResponseDelivery mDelivery; //如果不设置 会默认回调回queue的delivery，如果queue不设置，就回回调主线程
 
-    private final File mRootDirectory; //默认存储位置
-
     private static final int DEFAULT_PARALLEL_TASK_COUNT = 2;
 
-    public FileDownloadManager(File rootDirectory, RequestQueue queue, ResponseDelivery defaultDelivery, int parallelTaskCount) {
+    private final FileBasedCache mCache;
+
+    public FileDownloadManager(RequestQueue queue, FileBasedCache cache,  ResponseDelivery defaultDelivery, int parallelTaskCount) {
         if (parallelTaskCount >= queue.getThreadPoolSize()) {
             throw new IllegalArgumentException("parallelTaskCount[" + parallelTaskCount
                     + "] must less than threadPoolSize[" + queue.getThreadPoolSize() + "] of the RequestQueue.");
@@ -34,13 +33,13 @@ public class FileDownloadManager {
         mTaskQueue = new LinkedList<DownloadOperation>();
         mParallelTaskCount = parallelTaskCount;
         mRequestQueue = queue;
-        mRootDirectory = rootDirectory;
         mDelivery = defaultDelivery;
-        if (!mRootDirectory.exists()) {
-            if (!mRootDirectory.mkdirs()) {
-                VolleyLog.e("Unable to create cache dir %s", mRootDirectory.getAbsolutePath());
-            }
-        }
+        mCache = cache;
+
+    }
+
+    public FileDownloadManager(File rootDirectory, RequestQueue queue, ResponseDelivery defaultDelivery, int parallelTaskCount) {
+        this(queue, new FileBasedCache(rootDirectory), defaultDelivery, parallelTaskCount);
     }
 
     public FileDownloadManager(File rootDirectory, RequestQueue queue, ResponseDelivery defaultDelivery) {
@@ -51,9 +50,9 @@ public class FileDownloadManager {
         this(rootDirectory, queue, null, DEFAULT_PARALLEL_TASK_COUNT);
     }
 
-
-    public DownloadOperation add(File storeFile, String url, FileDownloadListener listener) {
+    public DownloadOperation add(File storeFile, String url, FileDownloadListener listener, boolean ignoreCache) {
         DownloadOperation controller = new DownloadOperation(storeFile, url, listener);
+        controller.setIgnoreCache(ignoreCache);
         synchronized (mTaskQueue) {
             mTaskQueue.add(controller);
         }
@@ -61,9 +60,18 @@ public class FileDownloadManager {
         return controller;
     }
 
+    public DownloadOperation add(File storeFile, String url, FileDownloadListener listener) {
+        return add(storeFile, url, listener, false);
+    }
+
     //此处会调用默认存储位置
     public DownloadOperation add(String url, FileDownloadListener listener) {
-        return add(null, url, listener);
+        return add(url, listener, false);
+    }
+
+    //此处会调用默认存储位置
+    public DownloadOperation add(String url, FileDownloadListener listener, boolean ignoreCache) {
+        return add(null, url, listener, ignoreCache);
     }
 
     public DownloadOperation get(File storeFile, String url) {
@@ -128,13 +136,21 @@ public class FileDownloadManager {
     public FileDownloadRequest buildRequest(File storeFile, String url) {
         FileDownloadRequest request = new FileDownloadRequest(storeFile == null? getDefaultCacheFile(url): storeFile, url);
         request.setDelivery(mDelivery);
+        if (storeFile == null) {
+            request.setCustomCacheManager(mCache);
+            request.setShouldCache(true);
+        }
         return request;
     }
 
     //没有传入默认位置会走这里
     //外部也可以通过这种方式来判断缓存是否存在
     public File getDefaultCacheFile(String url) {
-        return new File(mRootDirectory, HttpUtils.md5(url));
+        return mCache.getFileForKey(url);
+    }
+
+    public FileBasedCache getCache() {
+        return mCache;
     }
 
     /**
@@ -148,6 +164,7 @@ public class FileDownloadManager {
         private FileDownloadListener mListener;
         private File mStoreFile;
         private String mUrl;
+        private boolean mIgnoreCache;
 
         // The download request.
         private FileDownloadRequest mRequest;
@@ -169,6 +186,10 @@ public class FileDownloadManager {
             mUrl = url;
         }
 
+        public void setIgnoreCache(boolean ignoreCache) {
+            this.mIgnoreCache = ignoreCache;
+        }
+
         /**
          * For the parallel reason, only the {@link #schedule()} can call this method.
          *
@@ -178,7 +199,9 @@ public class FileDownloadManager {
             if (mStatus != STATUS_WAITING) return false;
 
             mRequest = buildRequest(mStoreFile, mUrl);
-
+            if (mIgnoreCache) {
+                mRequest.setShouldCache(false);
+            }
             // we create a Listener to wrapping that Listener which developer specified,
             // for the onFinish(), onSuccess(), onError() won't call when request was cancel reason.
             mRequest.setListener(new FileDownloadListener() {

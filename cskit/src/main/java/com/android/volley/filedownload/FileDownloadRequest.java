@@ -48,6 +48,11 @@ class FileDownloadRequest extends Request<File>{
         addHeader("Range", "bytes=" + mTemporaryFile.length() + "-");
     }
 
+    @Override
+    public String getCacheKey() {
+        return getUrl();
+    }
+
     /**
      * Ignore the response content, just rename the TemporaryFile to StoreFile.
      */
@@ -56,10 +61,14 @@ class FileDownloadRequest extends Request<File>{
         if (!isCanceled()) {
             if (mTemporaryFile.canRead() && mTemporaryFile.length() > 0) {
                 if (mTemporaryFile.renameTo(mStoreFile)) {
+                    VolleyLog.d("download success:"+ getUrl());
                     return Response.success(mStoreFile, null);
                 } else {
                     return Response.error(new VolleyError("Can't rename the download temporary file!"));
                 }
+            } else if (mStoreFile.exists()) { //走了缓存
+                VolleyLog.d("read cache:"+ getUrl());
+                return Response.success(mStoreFile, null);
             } else {
                 return Response.error(new VolleyError("Download temporary file was invalid!"));
             }
