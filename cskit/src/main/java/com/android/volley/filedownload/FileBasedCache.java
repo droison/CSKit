@@ -4,14 +4,13 @@ import com.android.volley.Cache;
 import com.android.volley.VolleyLog;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Created by song on 16/4/6.
  */
 public class FileBasedCache implements Cache{
-
-    /** Total amount of space currently used by the cache in bytes. */
-    private long mTotalSize = 0;
 
     /** The root directory to use for the cache. */
     private final File mRootDirectory;
@@ -23,10 +22,9 @@ public class FileBasedCache implements Cache{
     private static final int DEFAULT_DISK_USAGE_BYTES = 100 * 1024 * 1024;
 
     /** High water mark percentage for the cache */
-    private static final float HYSTERESIS_FACTOR = 0.9f;
+    private static final float HYSTERESIS_FACTOR = 0.75f;
 
-    /** Magic number for current version of cache file format. */
-    private static final int CACHE_MAGIC = 0x20150306;
+    private boolean mIsInit;
 
     /**
      * Constructs an instance of the DiskBasedCache at the specified directory.
@@ -59,6 +57,7 @@ public class FileBasedCache implements Cache{
         if (file.exists()){
             FileEntry entry = new FileEntry();
             entry.file = file;
+            file.setLastModified(System.currentTimeMillis());
             return entry;
         }
         return null;
@@ -68,7 +67,12 @@ public class FileBasedCache implements Cache{
     public synchronized void put(String url, Entry entry) { }
 
     @Override
-    public synchronized void initialize() {}
+    public synchronized void initialize() {
+        if (!mIsInit) {
+            pruneIfNeeded();
+        }
+        mIsInit = true;
+    }
 
     @Override
     public void invalidate(String url, boolean fullExpire) {
@@ -101,16 +105,48 @@ public class FileBasedCache implements Cache{
     }
 
     /**
-     * delete file or directory
-     * <ul>
-     * <li>if path is null or empty, return true</li>
-     * <li>if path not exist, return true</li>
-     * <li>if path exist, delete recursion. return true</li>
-     * <ul>
-     *
-     * @param file
-     * @return
+     * 用于外面主动调用,不要在主线程执行
      */
+    public synchronized void pruneIfNeeded() {
+        if (VolleyLog.DEBUG) {
+            VolleyLog.v("Pruning old cache entries.");
+        }
+        if (!mRootDirectory.exists() || !mRootDirectory.isDirectory())
+        {
+            VolleyLog.e("mRootDirectory is not exist or mRootDirectory is not directory");
+            return;
+        }
+        long before = 0;
+        File[] files = mRootDirectory.listFiles();
+        for (File file : files) {
+            if (!file.isDirectory())
+                before += file.length();
+        }
+        if (before > mMaxCacheSizeInBytes * HYSTERESIS_FACTOR) { //超过上限的75%
+            Arrays.sort(files, new Comparator<File>() {
+                @Override
+                public int compare(File lhs, File rhs) {
+                    return (int) (lhs.lastModified() - rhs.lastModified());
+                }
+            });
+            for (File file : files) {
+                if (!file.isDirectory())
+                {
+                    long size = file.length();
+                    boolean deleted = file.delete();
+                    if (deleted) {
+                        before -= size;
+                    } else {
+                        VolleyLog.d("Could not delete filename=%s", file.getAbsoluteFile());
+                    }
+                    if (before < mMaxCacheSizeInBytes * HYSTERESIS_FACTOR) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     public static boolean deleteFile(File file) {
         if (file == null) {
             return true;

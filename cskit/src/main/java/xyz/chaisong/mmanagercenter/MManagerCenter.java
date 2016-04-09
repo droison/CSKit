@@ -1,7 +1,6 @@
 package xyz.chaisong.mmanagercenter;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +43,6 @@ public class MManagerCenter {
         isDebugMode = isDebug;
     }
 
-    @Nullable
     public static MManagerCenter defaultManagerCenter()
     {
         return defaultManagerCenter;
