@@ -9,12 +9,15 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import xyz.chaisong.cskitdemo.network.QDNetUtil;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        QDNetUtil.init(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -26,6 +29,24 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        QDPrefetcher prefetcher = new QDPrefetcher(this);
+        prefetcher.add(25268);
+        prefetcher.add(25256);
+        prefetcher.add(25203);
+        prefetcher.add(25155);
+        prefetcher.add(25045);
+
+        prefetcher.add(25268);
+        prefetcher.add(25256);
+        prefetcher.add(25203);
+        prefetcher.add(25155);
+        prefetcher.add(25045);
+
+        prefetcher.add(25268);
+        prefetcher.add(25256);
+        prefetcher.add(25203);
+        prefetcher.add(25155);
+        prefetcher.add(25045);
     }
 
     @Override
