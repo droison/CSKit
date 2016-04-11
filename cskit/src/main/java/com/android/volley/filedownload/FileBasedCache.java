@@ -24,8 +24,6 @@ public class FileBasedCache implements Cache{
     /** High water mark percentage for the cache */
     private static final float HYSTERESIS_FACTOR = 0.75f;
 
-    private boolean mIsInit;
-
     /**
      * Constructs an instance of the DiskBasedCache at the specified directory.
      * @param rootDirectory The root directory of the cache.
@@ -68,10 +66,7 @@ public class FileBasedCache implements Cache{
 
     @Override
     public synchronized void initialize() {
-        if (!mIsInit) {
-            pruneIfNeeded();
-        }
-        mIsInit = true;
+        pruneIfNeeded();
     }
 
     @Override
@@ -107,7 +102,7 @@ public class FileBasedCache implements Cache{
     /**
      * 用于外面主动调用,不要在主线程执行
      */
-    public synchronized void pruneIfNeeded() {
+    protected synchronized void pruneIfNeeded() {
         if (VolleyLog.DEBUG) {
             VolleyLog.v("Pruning old cache entries.");
         }

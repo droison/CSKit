@@ -3,6 +3,7 @@ package com.android.volley.filedownload;
 import com.android.volley.RequestQueue;
 import com.android.volley.ResponseDelivery;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -206,11 +207,13 @@ public class FileDownloadManager {
 
                 @Override
                 public void onPreExecute() {
+                    VolleyLog.d("onPreExecute : " + mUrl);
                     mListener.onPreExecute();
                 }
 
                 @Override
                 public void onSuccess(File response) {
+                    VolleyLog.d("onSuccess : " + mUrl);
                     // we don't inform SUCCESS when it was cancel.
                     if (!isCanceled) {
                         mListener.onSuccess(response);
@@ -220,6 +223,7 @@ public class FileDownloadManager {
 
                 @Override
                 public void onError(VolleyError error) {
+                    VolleyLog.d("onError : " + mUrl);
                     // we don't inform ERROR when it was cancel.
                     if (!isCanceled) {
                         mListener.onError(error);
@@ -229,6 +233,7 @@ public class FileDownloadManager {
 
                 @Override
                 public void onCancel() {
+                    VolleyLog.d("onCancel : " + mUrl);
                     isCanceled = true;
                     remove(DownloadOperation.this);
                 }
