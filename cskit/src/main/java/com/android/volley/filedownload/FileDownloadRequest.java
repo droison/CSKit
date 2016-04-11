@@ -147,7 +147,6 @@ class FileDownloadRequest extends Request<File>{
         InputStream in = null;
         try {
             in = entity.getContent();
-            // Determine the response gzip encoding, support for HttpClientStack download.
             if (HttpUtils.isGzipContent(response) && !(in instanceof GZIPInputStream)) {
                 in = new GZIPInputStream(in);
             }
