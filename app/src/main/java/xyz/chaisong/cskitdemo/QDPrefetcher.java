@@ -8,11 +8,16 @@ import android.util.Log;
 
 import com.android.volley.ExecutorDelivery;
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.ResponseDelivery;
 import com.android.volley.VolleyError;
+import com.android.volley.filedownload.FileBasedCache;
 import com.android.volley.filedownload.FileDownloadListener;
 import com.android.volley.filedownload.FileDownloadManager;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.OkHttpStack;
+import com.squareup.okhttp.OkHttpClient;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -69,12 +74,14 @@ public class QDPrefetcher implements QDNetWorkCallBack<ArticleDetailEntity>, Fil
     public FileDownloadManager getFileDownloadManager() {
         if (mFileDownloadManager == null) {
             File dirFile = getPrefetcherFileCacheDir();
-            mFileDownloadManager = new FileDownloadManager(dirFile, prefetcherDelivery, 2);
+            RequestQueue queue = new RequestQueue(new FileBasedCache(dirFile), new BasicNetwork(new OkHttpStack(new OkHttpClient())));
+            mFileDownloadManager = new FileDownloadManager(queue, prefetcherDelivery, 2);
             if (!dirFile.exists()) {
                 if (!dirFile.mkdirs()) {
                     Log.e("QDPrefetcher", "Unable to create cache dir " + dirFile.getAbsolutePath());
                 }
             }
+            queue.start();
         }
         return mFileDownloadManager;
     }
@@ -162,18 +169,10 @@ public class QDPrefetcher implements QDNetWorkCallBack<ArticleDetailEntity>, Fil
             updateArticleResourceCount(resourseNum + 1);
 
             for (String url : articleDetailEntity.getResponse().getArticle().getJs()) {
-                if (getFileDownloadManager().getDefaultCacheFile(url).exists()) {
-                    completeOne();
-                } else {
-                    getFileDownloadManager().add(url, this);
-                }
+                getFileDownloadManager().add(url, this);
             }
             for (String url : articleDetailEntity.getResponse().getArticle().getCss()) {
-                if (getFileDownloadManager().getDefaultCacheFile(url).exists()) {
-                    completeOne();
-                } else {
-                    getFileDownloadManager().add(url, this);
-                }
+                getFileDownloadManager().add(url, this);
             }
         } else {
             updateArticleResourceCount(1); //只有1个资源
