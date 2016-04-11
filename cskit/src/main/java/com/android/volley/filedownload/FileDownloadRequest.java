@@ -38,7 +38,7 @@ class FileDownloadRequest extends Request<File>{
         mTemporaryFile = new File(storeFile + ".tmp");
 
         // Turn the retries frequency greater.
-        setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 200, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        setRetryPolicy(new DefaultRetryPolicy(1000*10, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         setShouldCache(false);
     }
 

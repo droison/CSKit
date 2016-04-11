@@ -3,9 +3,6 @@ package com.android.volley.filedownload;
 import com.android.volley.RequestQueue;
 import com.android.volley.ResponseDelivery;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.OkHttpStack;
-import com.squareup.okhttp.OkHttpClient;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -27,26 +24,28 @@ public class FileDownloadManager {
 
     private final FileBasedCache mCache;
 
-    public FileDownloadManager(FileBasedCache cache,  ResponseDelivery defaultDelivery, int parallelTaskCount) {
-        mRequestQueue = new RequestQueue(cache, new BasicNetwork(new OkHttpStack(new OkHttpClient())), parallelTaskCount);
+    public FileDownloadManager(RequestQueue queue, ResponseDelivery defaultDelivery, int parallelTaskCount) {
+        if (parallelTaskCount >= queue.getThreadPoolSize()) {
+            throw new IllegalArgumentException("parallelTaskCount[" + parallelTaskCount
+                    + "] must less than threadPoolSize[" + queue.getThreadPoolSize() + "] of the RequestQueue.");
+        }
 
+        if (!(queue.getCache() instanceof FileBasedCache)) {
+            throw new IllegalArgumentException("cache of requestQueue must be instanceof FileBasedCache");
+        }
         mTaskQueue = new LinkedList<DownloadOperation>();
         mParallelTaskCount = parallelTaskCount;
-
+        mRequestQueue = queue;
         mDelivery = defaultDelivery;
-        mCache = cache;
+        mCache = (FileBasedCache)queue.getCache();
     }
 
-    public FileDownloadManager(File rootDirectory, ResponseDelivery defaultDelivery, int parallelTaskCount) {
-        this(new FileBasedCache(rootDirectory), defaultDelivery, parallelTaskCount);
+    public FileDownloadManager(RequestQueue queue, ResponseDelivery defaultDelivery) {
+        this(queue, defaultDelivery, DEFAULT_PARALLEL_TASK_COUNT);
     }
 
-    public FileDownloadManager(File rootDirectory, ResponseDelivery defaultDelivery) {
-        this(rootDirectory, defaultDelivery, DEFAULT_PARALLEL_TASK_COUNT);
-    }
-
-    public FileDownloadManager(File rootDirectory) {
-        this(rootDirectory, null, DEFAULT_PARALLEL_TASK_COUNT);
+    public FileDownloadManager(File rootDirectory, RequestQueue queue) {
+        this(queue, null, DEFAULT_PARALLEL_TASK_COUNT);
     }
 
     public DownloadOperation add(File storeFile, String url, FileDownloadListener listener, boolean ignoreCache) {
