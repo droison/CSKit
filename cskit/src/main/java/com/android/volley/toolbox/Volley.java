@@ -22,6 +22,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 
 import com.android.volley.Network;
 import com.android.volley.RequestQueue;
+import com.squareup.okhttp.OkHttpClient;
 
 import java.io.File;
 
@@ -49,7 +50,7 @@ public class Volley {
         }
 
         if (stack == null) {
-            stack = new HurlStack();
+            stack = new OkHttpStack(new OkHttpClient());
         }
 
         Network network = new BasicNetwork(stack);
