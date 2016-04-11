@@ -123,8 +123,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
      */
     private ResponseDelivery mDelivery;
 
-    /** The cache to read from. default null*/
-    private Cache mCustomCacheManager;
     /**
      * Creates a new request with the given URL and error listener.  Note that
      * the normal response listener is not provided here as delivery of responses
@@ -296,14 +294,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 
     public void setDelivery(ResponseDelivery mDelivery) {
         this.mDelivery = mDelivery;
-    }
-
-    public Cache getCustomCacheManager() {
-        return mCustomCacheManager;
-    }
-
-    public void setCustomCacheManager(Cache mCache) {
-        this.mCustomCacheManager = mCache;
     }
 
     /**

@@ -101,12 +101,8 @@ public class CacheDispatcher extends Thread {
                 }
 
                 // Attempt to retrieve this item from cache.
-                Cache.Entry entry = null;
-                if (request.getCustomCacheManager() != null) {
-                    entry = request.getCustomCacheManager().get(request.getCacheKey());
-                } else {
-                    entry = mCache.get(request.getCacheKey());
-                }
+                Cache.Entry entry = mCache.get(request.getCacheKey());
+
                 if (entry == null) {
                     request.addMarker("cache-miss");
                     // Cache miss; send off to the network dispatcher.
