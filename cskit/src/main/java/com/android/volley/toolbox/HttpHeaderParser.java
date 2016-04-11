@@ -18,10 +18,8 @@ package com.android.volley.toolbox;
 
 import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
-
-import org.apache.http.impl.cookie.DateParseException;
-import org.apache.http.impl.cookie.DateUtils;
-import org.apache.http.protocol.HTTP;
+import com.android.volley.support.HTTP;
+import com.squareup.okhttp.internal.http.HttpDate;
 
 import java.util.Map;
 
@@ -124,13 +122,7 @@ public class HttpHeaderParser {
      * Parse date in RFC1123 format, and return its value as epoch
      */
     public static long parseDateAsEpoch(String dateStr) {
-        try {
-            // Parse date in RFC1123 format if this header contains one
-            return DateUtils.parseDate(dateStr).getTime();
-        } catch (DateParseException e) {
-            // Date in invalid format, fallback to 0
-            return 0;
-        }
+        return HttpDate.parse(dateStr).getTime();
     }
 
     /**

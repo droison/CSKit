@@ -10,9 +10,7 @@ import com.android.volley.ResponseDelivery;
 import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import com.android.volley.support.VolleyResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,11 +89,10 @@ class FileDownloadRequest extends Request<File>{
      * the TemporaryFile will be rename to StoreFile.
      */
     @Override
-    public byte[] handleResponse(HttpResponse response, ResponseDelivery delivery) throws IOException, ServerError {
+    public byte[] handleResponse(VolleyResponse response, ResponseDelivery delivery) throws IOException, ServerError {
         // Content-Length might be negative when use HttpURLConnection because it default header Accept-Encoding is gzip,
         // we can force set the Accept-Encoding as identity in prepare() method to slove this problem but also disable gzip response.
-        HttpEntity entity = response.getEntity();
-        long fileSize = entity.getContentLength();
+        long fileSize = response.contentLength;
         if (fileSize <= 0) {
             VolleyLog.d("Response doesn't present Content-Length!");
         }
@@ -146,7 +143,7 @@ class FileDownloadRequest extends Request<File>{
 
         InputStream in = null;
         try {
-            in = entity.getContent();
+            in = response.byteStream;
             if (HttpUtils.isGzipContent(response) && !(in instanceof GZIPInputStream)) {
                 in = new GZIPInputStream(in);
             }
@@ -174,7 +171,7 @@ class FileDownloadRequest extends Request<File>{
 
             try {
                 // release the resources by "consuming the content".
-                entity.consumeContent();
+                response.byteStream.close();
             } catch (Exception e) {
                 // This can happen if there was an exception above that left the entity in
                 // an invalid state.

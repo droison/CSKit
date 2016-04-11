@@ -2,9 +2,8 @@ package com.android.volley.filedownload;
 
 import android.text.TextUtils;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.protocol.HTTP;
+import com.android.volley.support.HTTP;
+import com.android.volley.support.VolleyResponse;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -20,29 +19,25 @@ public class HttpUtils {
     /**
      * Returns the charset specified in the Content-Type of this header.
      */
-    public static String getCharset(HttpResponse response) {
-        Header header = response.getFirstHeader(HTTP.CONTENT_TYPE);
-        if (header != null) {
-            String contentType = header.getValue();
-            if (!TextUtils.isEmpty(contentType)) {
-                String[] params = contentType.split(";");
-                for (int i = 1; i < params.length; i++) {
-                    String[] pair = params[i].trim().split("=");
-                    if (pair.length == 2 && pair[0].equals("charset")) {
-                        return pair[1];
-                    }
+    public static String getCharset(VolleyResponse response) {
+        String contentType = response.headers.get(HTTP.CONTENT_TYPE);
+        if (!TextUtils.isEmpty(contentType)) {
+            String[] params = contentType.split(";");
+            for (int i = 1; i < params.length; i++) {
+                String[] pair = params[i].trim().split("=");
+                if (pair.length == 2 && pair[0].equals("charset")) {
+                    return pair[1];
                 }
             }
         }
         return null;
     }
 
-    public static String getHeader(HttpResponse response, String key) {
-        Header header = response.getFirstHeader(key);
-        return header == null ? null : header.getValue();
+    public static String getHeader(VolleyResponse response, String key) {
+        return response.headers.get(key);
     }
 
-    public static boolean isSupportRange(HttpResponse response) {
+    public static boolean isSupportRange(VolleyResponse response) {
         if (TextUtils.equals(getHeader(response, "Accept-Ranges"), "bytes")) {
             return true;
         }
@@ -50,7 +45,7 @@ public class HttpUtils {
         return value != null && value.startsWith("bytes");
     }
 
-    public static boolean isGzipContent(HttpResponse response) {
+    public static boolean isGzipContent(VolleyResponse response) {
         return TextUtils.equals(getHeader(response, "Content-Encoding"), "gzip");
     }
 

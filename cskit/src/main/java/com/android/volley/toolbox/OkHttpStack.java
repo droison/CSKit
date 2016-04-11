@@ -25,23 +25,11 @@ package com.android.volley.toolbox;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
+import com.android.volley.support.VolleyResponse;
 import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
-import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicHttpResponse;
-import org.apache.http.message.BasicStatusLine;
 
 import java.io.IOException;
 import java.util.Map;
@@ -61,7 +49,7 @@ public class OkHttpStack implements HttpStack {
     }
 
     @Override
-    public HttpResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
+    public VolleyResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
             throws IOException, AuthFailureError {
 
         OkHttpClient client = mClient.clone();
@@ -85,36 +73,10 @@ public class OkHttpStack implements HttpStack {
 
         com.squareup.okhttp.Request okHttpRequest = okHttpRequestBuilder.build();
         Call okHttpCall = client.newCall(okHttpRequest);
-        Response okHttpResponse = okHttpCall.execute();
 
-        StatusLine responseStatus = new BasicStatusLine(parseProtocol(okHttpResponse.protocol()), okHttpResponse.code(), okHttpResponse.message());
-        BasicHttpResponse response = new BasicHttpResponse(responseStatus);
-        response.setEntity(entityFromOkHttpResponse(okHttpResponse));
-
-        Headers responseHeaders = okHttpResponse.headers();
-        for (int i = 0, len = responseHeaders.size(); i < len; i++) {
-            final String name = responseHeaders.name(i), value = responseHeaders.value(i);
-            if (name != null) {
-                response.addHeader(new BasicHeader(name, value));
-            }
-        }
-
-        return response;
+        return VolleyResponse.convertOKResponseToVolleyResponse(okHttpCall.execute());
     }
 
-    private static HttpEntity entityFromOkHttpResponse(Response r) throws IOException {
-        BasicHttpEntity entity = new BasicHttpEntity();
-        ResponseBody body = r.body();
-
-        entity.setContent(body.byteStream());
-        entity.setContentLength(body.contentLength());
-        entity.setContentEncoding(r.header("Content-Encoding"));
-
-        if (body.contentType() != null) {
-            entity.setContentType(body.contentType().type());
-        }
-        return entity;
-    }
 
     @SuppressWarnings("deprecation")
     private static void setConnectionParametersForRequest(com.squareup.okhttp.Request.Builder builder, Request<?> request)
@@ -154,21 +116,6 @@ public class OkHttpStack implements HttpStack {
             default:
                 throw new IllegalStateException("Unknown method type.");
         }
-    }
-
-    private static ProtocolVersion parseProtocol(final Protocol p) {
-        switch (p) {
-            case HTTP_1_0:
-                return new ProtocolVersion("HTTP", 1, 0);
-            case HTTP_1_1:
-                return new ProtocolVersion("HTTP", 1, 1);
-            case SPDY_3:
-                return new ProtocolVersion("SPDY", 3, 1);
-            case HTTP_2:
-                return new ProtocolVersion("HTTP", 2, 0);
-        }
-
-        throw new IllegalAccessError("Unkwown protocol");
     }
 
     private static RequestBody createRequestBody(Request r) throws AuthFailureError {

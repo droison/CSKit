@@ -23,16 +23,11 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import com.android.volley.VolleyLog.MarkerLog;
-import com.android.volley.toolbox.PoolingByteArrayOutputStream;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import com.android.volley.support.VolleyResponse;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -671,7 +666,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         return false;
     }
 
-    public byte[] handleResponse(HttpResponse response, ResponseDelivery delivery) throws IOException, ServerError {
+    public byte[] handleResponse(VolleyResponse response, ResponseDelivery delivery) throws IOException, ServerError {
         return new byte[0];
     }
 

@@ -26,9 +26,9 @@ public class FileDownloadManager {
     private final FileBasedCache mCache;
 
     public FileDownloadManager(RequestQueue queue, ResponseDelivery defaultDelivery, int parallelTaskCount) {
-        if (parallelTaskCount >= queue.getThreadPoolSize()) {
-            throw new IllegalArgumentException("parallelTaskCount[" + parallelTaskCount
-                    + "] must less than threadPoolSize[" + queue.getThreadPoolSize() + "] of the RequestQueue.");
+        if (parallelTaskCount > queue.getThreadPoolSize()) {
+            throw new IllegalArgumentException("threadPoolSize[" + queue.getThreadPoolSize()
+                    + "] must more than parallelTaskCount[" + parallelTaskCount + "] of the RequestQueue.");
         }
 
         if (!(queue.getCache() instanceof FileBasedCache)) {
