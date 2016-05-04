@@ -68,6 +68,12 @@ public class QDRequest<T extends RespBaseMeta> extends Request<RespEntity<T>> {
     }
 
     @Override
+    public void addMarker(String tag) {
+        super.addMarker(tag);
+        Log.w("QDRequest", "addMarker:" + tag + ", url:" + getUrl());
+    }
+
+    @Override
     public Request<?> setRequestQueue(RequestQueue requestQueue) {
         Log.w("QDRequest", "loadUrl:" + getUrl());
         if (mPrepare != null) {

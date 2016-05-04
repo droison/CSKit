@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+
         QDPrefetcher prefetcher = new QDPrefetcher(this);
 
         prefetcher.add(25268);
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         prefetcher.add(25155);
         prefetcher.add(25045);
         prefetcher.add(25252);
+
     }
 
     @Override
