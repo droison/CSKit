@@ -96,7 +96,7 @@ public class FileBasedCache implements Cache{
      * Returns a file object for the given cache key.
      */
     public File getFileForKey(String url) {
-        return new File(mRootDirectory, HttpUtils.md5(url));
+        return new File(mRootDirectory, HttpUtils.md5(url) + "." + HttpUtils.parseSuffix(url));
     }
 
     /**

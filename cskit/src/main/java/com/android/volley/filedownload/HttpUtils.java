@@ -7,6 +7,8 @@ import com.android.volley.support.VolleyResponse;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by song on 16/3/30.
@@ -74,5 +76,33 @@ public class HttpUtils {
             sb.append(hex);
         }
         return sb.toString();
+    }
+
+    final static Pattern pattern = Pattern.compile("\\S*[?]\\S*");
+
+    /**
+     * 获取链接的后缀名
+     * @return
+     */
+    public static String parseSuffix(String url) {
+        Matcher matcher = pattern.matcher(url);
+
+        String[] spUrl = url.split("/");
+        int len = spUrl.length;
+        String endUrl = spUrl[len - 1];
+
+        String[] extArray;
+        if(matcher.find()) {
+            String[] spEndUrl = endUrl.split("\\?");
+            extArray = spEndUrl[0].split("\\.");
+        } else {
+            extArray = endUrl.split("\\.");
+        }
+
+        if (extArray.length > 1) {
+            return extArray[1];
+        } else {
+            return "unknow";
+        }
     }
 }
