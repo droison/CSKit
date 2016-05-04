@@ -57,7 +57,6 @@ public class ExecutorDelivery implements ResponseDelivery {
 
     @Override
     public void postResponse(Request<?> request, Response<?> response, Runnable runnable) {
-        request.markDelivered();
         request.addMarker("post-response");
         mResponsePoster.execute(new ResponseDeliveryRunnable(request, response, runnable));
     }
@@ -126,18 +125,18 @@ public class ExecutorDelivery implements ResponseDelivery {
                 return;
             }
 
-            // Deliver a normal response or error, depending.
-            if (mResponse.isSuccess()) {
-                mRequest.deliverResponse(mResponse.result);
-            } else {
-                mRequest.deliverError(mResponse.error);
-            }
-
             // If this is an intermediate response, add a marker, otherwise we're done
             // and the request can be finished.
             if (mResponse.intermediate) {
                 mRequest.addMarker("intermediate-response");
             } else {
+                mRequest.markDelivered();
+                // Deliver a normal response or error, depending.
+                if (mResponse.isSuccess()) {
+                    mRequest.deliverResponse(mResponse.result);
+                } else {
+                    mRequest.deliverError(mResponse.error);
+                }
                 mRequest.finish("done");
             }
 

@@ -22,6 +22,8 @@ import android.os.Build;
 import android.os.Process;
 import android.os.SystemClock;
 
+import com.android.volley.support.HttpStatus;
+
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -118,22 +120,26 @@ public class NetworkDispatcher extends Thread {
 
                 // If the server returned 304 AND we delivered a response already,
                 // we're done -- don't deliver a second identical response.
-                if (networkResponse.notModified && request.hasHadResponseDelivered()) {
-                    request.finish("not-modified");
-                    continue;
+                Response<?> response = null;
+                if ( networkResponse.notModified ) {
+                    if (request.hasHadResponseDelivered()) {
+                        request.finish("not-modified");
+                        continue;
+                    } else {
+                        request.addMarker("parse-cache-when-not-modified");
+                        response = request.parseNetworkResponse(new NetworkResponse(HttpStatus.SC_NOT_MODIFIED, request.getCacheEntry().data, networkResponse.headers, true));
+                    }
+                } else {
+                    // Parse the response here on the worker thread.
+                    response = request.parseNetworkResponse(networkResponse);
+                    request.addMarker("network-parse-complete");
+                    // Write to cache if applicable.
+                    // TODO: Only update cache metadata instead of entire record for 304s.
+                    if (request.shouldCache() && response.cacheEntry != null) {
+                        mCache.put(request.getCacheKey(), response.cacheEntry);
+                        request.addMarker("network-cache-written");
+                    }
                 }
-
-                // Parse the response here on the worker thread.
-                Response<?> response = request.parseNetworkResponse(networkResponse);
-                request.addMarker("network-parse-complete");
-
-                // Write to cache if applicable.
-                // TODO: Only update cache metadata instead of entire record for 304s.
-                if (request.shouldCache() && response.cacheEntry != null) {
-                    mCache.put(request.getCacheKey(), response.cacheEntry);
-                    request.addMarker("network-cache-written");
-                }
-
                 // Post the response back.
                 request.markDelivered();
                 delivery.postResponse(request, response);
