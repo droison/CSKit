@@ -16,6 +16,11 @@ repositories {
 compile 'xyz.chaisong.cskit:cskit:0.0.3'
 ```
 
+	lib编译并上传到jcenter的命令：
+	$: cd cskit
+	$: ../gradlew install
+	$: ../gradlew bintrayUpload
+
 项目的Github地址为<http://github.com/droison/CSKit>
 ## 1、MManagerCenter 
 主要用于针对整个App的单例管理，已经在[好奇心日报][好奇心Android]上线使用1年多，稳定性和可用性经过检验。
