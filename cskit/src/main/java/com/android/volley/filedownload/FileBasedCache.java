@@ -32,11 +32,6 @@ public class FileBasedCache implements Cache{
     public FileBasedCache(File rootDirectory, int maxCacheSizeInBytes) {
         mRootDirectory = rootDirectory;
         mMaxCacheSizeInBytes = maxCacheSizeInBytes;
-        if (!mRootDirectory.exists()) {
-            if (!mRootDirectory.mkdirs()) {
-                VolleyLog.e("Unable to create cache dir %s", mRootDirectory.getAbsolutePath());
-            }
-        }
     }
 
     /**
@@ -66,6 +61,12 @@ public class FileBasedCache implements Cache{
 
     @Override
     public synchronized void initialize() {
+        if (!mRootDirectory.exists()) {
+            if (!mRootDirectory.mkdirs()) {
+                VolleyLog.e("Unable to create cache dir %s", mRootDirectory.getAbsolutePath());
+                return;
+            }
+        }
         pruneIfNeeded();
     }
 
