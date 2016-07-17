@@ -25,6 +25,7 @@ class FileDownloadRequest extends Request<File>{
     private File mStoreFile;
     private File mTemporaryFile;
     private FileDownloadListener mListener;
+    private boolean ingoreLocalTempFile;
 
     public FileDownloadRequest(String storeFilePath, String url) {
         this(new File(storeFilePath), url);
@@ -33,7 +34,7 @@ class FileDownloadRequest extends Request<File>{
     public FileDownloadRequest(File storeFile, String url) {
         super(Method.GET, url, null);
         mStoreFile = storeFile;
-        mTemporaryFile = new File(storeFile + ".tmp");
+        mTemporaryFile = new File(storeFile + ".cstmp");
 
         // Turn the retries frequency greater.
         setRetryPolicy(new DefaultRetryPolicy(1000*10, 1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -43,7 +44,9 @@ class FileDownloadRequest extends Request<File>{
     @Override
     public void prepare() {
         super.prepare();
-        addHeader("Range", "bytes=" + mTemporaryFile.length() + "-");
+        if (!ingoreLocalTempFile && mTemporaryFile.exists() && mTemporaryFile.length() > 0) {
+            addHeader("Range", "bytes=" + mTemporaryFile.length() + "-");
+        }
     }
 
     @Override
@@ -223,5 +226,9 @@ class FileDownloadRequest extends Request<File>{
 
     public void setListener(FileDownloadListener listener) {
         this.mListener = listener;
+    }
+
+    public void setIngoreLocalTempFile(boolean ingoreLocalTempFile) {
+        this.ingoreLocalTempFile = ingoreLocalTempFile;
     }
 }
