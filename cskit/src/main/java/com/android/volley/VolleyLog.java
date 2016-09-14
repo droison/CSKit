@@ -32,7 +32,7 @@ import java.util.Locale;
 public class VolleyLog {
     public static String TAG = "Volley";
 
-    public static boolean DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
+    public static boolean DEBUG = false;
 
     /**
      * Customize the log tag for your application, so that other apps
@@ -45,9 +45,6 @@ public class VolleyLog {
     public static void setTag(String tag) {
         d("Changing log tag to %s", tag);
         TAG = tag;
-
-        // Reinitialize the DEBUG "constant"
-        DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
     }
 
     public static void v(String format, Object... args) {
@@ -57,7 +54,8 @@ public class VolleyLog {
     }
 
     public static void d(String format, Object... args) {
-        Log.d(TAG, buildMessage(format, args));
+        if (DEBUG)
+            Log.d(TAG, buildMessage(format, args));
     }
 
     public static void e(String format, Object... args) {
