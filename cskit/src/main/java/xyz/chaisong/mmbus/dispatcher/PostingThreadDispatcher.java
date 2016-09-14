@@ -1,7 +1,7 @@
 package xyz.chaisong.mmbus.dispatcher;
 
 /**
- * Created by SilenceDut on 16/8/1.
+ * Created by song on 16/9/14.
  */
 
 class PostingThreadDispatcher implements Dispatcher {

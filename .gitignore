@@ -9,3 +9,6 @@
 library/build
 local.properties
 cskit/build
+gradlew
+cskit/gradle/wrapper
+gradlew.bat

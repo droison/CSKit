@@ -1,7 +1,7 @@
 package xyz.chaisong.mmbus.annotation;
 
 /**
- * Created by SilenceDut on 16/8/3.
+ * Created by song on 16/9/14.
  */
 
 public enum RunThread {

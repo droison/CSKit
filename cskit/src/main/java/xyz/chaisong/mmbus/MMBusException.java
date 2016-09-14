@@ -1,5 +1,7 @@
 package xyz.chaisong.mmbus;
 
+import android.util.Log;
+
 /**
  * Created by song on 16/9/14.
  */
@@ -19,14 +21,23 @@ public class MMBusException extends RuntimeException {
     }
 
     public static void throwException(String detailMessage) {
-        throw new MMBusException(detailMessage);
+        if (MMBus.isDebugMode)
+            throw new MMBusException(detailMessage);
+        else
+            Log.e("MMBus", detailMessage);
     }
 
     public static void throwException(Throwable throwable) {
-        throw new MMBusException(throwable);
+        if (MMBus.isDebugMode)
+            throw new MMBusException(throwable);
+        else
+            Log.e("MMBus", "", throwable);
     }
 
     public static void throwException(String detailMessage, Throwable throwable) {
-        throw new MMBusException(detailMessage, throwable);
+        if (MMBus.isDebugMode)
+            throw new MMBusException(detailMessage, throwable);
+        else
+            Log.e("MMBus", detailMessage, throwable);
     }
 }

@@ -5,7 +5,7 @@ import android.os.Looper;
 import xyz.chaisong.mmbus.annotation.RunThread;
 
 /**
- * Created by SilenceDut on 16/8/2.
+ * Created by song on 16/9/14.
  */
 
 public class DispatcherFactory {
