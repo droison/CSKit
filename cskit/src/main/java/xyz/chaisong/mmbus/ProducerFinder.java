@@ -59,7 +59,7 @@ public class ProducerFinder {
 
                 Class<?> eventType = method.getReturnType();
 
-                if (eventType != Void.class || !eventType.equals(Void.TYPE)) { //返回值应该是void
+                if (eventType != Void.class && !eventType.equals(Void.TYPE)) { //返回值应该是void
                     MMBusException.throwException("Method " + method
                             + " has a return type of " + eventType.getSimpleName() +".  Must declare a void type.");
                     continue;
