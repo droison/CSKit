@@ -23,8 +23,11 @@ class EventHandler<T> implements InvocationHandler {
     this.mReceiverProxy = (T) Proxy.newProxyInstance(mTargetInterface.getClassLoader(), new Class[] {mTargetInterface}, this);
   }
 
-  void addReceiver(T receiver) {
+  boolean addReceiver(T receiver) {
+    if (mReceivers.contains(receiver))
+      return false;
     mReceivers.add(receiver);
+    return true;
   }
 
   void removeReceiver(T receiver) {
@@ -34,8 +37,8 @@ class EventHandler<T> implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) {
     for(T receiver : mReceivers) {
-      Reception reception = new Reception(receiver,method,args);
-      reception.dispatchEvent();
+      Subscriber subscriber = new Subscriber(receiver,method,args);
+      subscriber.dispatchEvent();
     }
     return null;
   }

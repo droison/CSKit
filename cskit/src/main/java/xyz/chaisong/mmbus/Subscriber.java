@@ -11,7 +11,7 @@ import xyz.chaisong.mmbus.dispatcher.DispatcherFactory;
  * Created by song on 16/9/14.
  */
 
-class Reception {
+class Subscriber {
 
     private Object mReceiver;
     private Method mInvokedMethod;
@@ -19,7 +19,7 @@ class Reception {
     private Runnable mRunnuble;
     Dispatcher mDispatcher;
 
-    Reception(Object receiver, Method invokedMethod, Object[] args) {
+    Subscriber(Object receiver, Method invokedMethod, Object[] args) {
         this.mReceiver = receiver;
         this.mInvokedMethod = invokedMethod;
         this.mArgs = args;
