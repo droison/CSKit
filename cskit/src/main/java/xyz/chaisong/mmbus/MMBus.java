@@ -2,7 +2,9 @@ package xyz.chaisong.mmbus;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import xyz.chaisong.mmanagercenter.MManager;
@@ -21,9 +23,9 @@ public class MMBus extends MManager {
 
     private Map<Class<?>,EventHandler> mReceiverHandlerByInterface = new ConcurrentHashMap<>();
 
-    /**
-     * Identifier used to differentiate the event bus instance.
-     */
+    private final ConcurrentMap<Class<?>, Set<Producer>> producersByType =
+            new ConcurrentHashMap<Class<?>, Set<Producer>>();
+
     private final String identifier;
 
     public static synchronized MMBus getInstance() {
@@ -64,7 +66,17 @@ public class MMBus extends MManager {
             receiverHandler = new EventHandler<T>(targetInterface, new CopyOnWriteArraySet<T>());
             mReceiverHandlerByInterface.put(targetInterface,receiverHandler);
         }
-        receiverHandler.addReceiver(receiver);
+
+        if (receiverHandler.addReceiver(receiver)) {//不是重复注册,则调用OnSubscribe
+            //OnSubscribe调用
+            Set<Producer> producers = producersByType.get(targetInterface);
+            if (producers != null) {
+                for (Producer producer: producers) {
+                    if (producer.isValid())
+                        producer.dispatchEvent(receiver);
+                }
+            }
+        }
     }
 
     /**
@@ -107,6 +119,45 @@ public class MMBus extends MManager {
                     iterator.remove();
                 }
             }
+        }
+    }
+
+    public void addRegisterListener(Object listener) {
+        //OnSubscribe遍历,将其封装成Producer存到producersByType中
+        Map<Class<?>, Producer> foundProducerMap = ProducerFinder.findAllProducers(listener);
+        for (Class<?> type : foundProducerMap.keySet()) {
+            Set<Producer> producers = producersByType.get(type);
+            if (producers == null) {
+                //concurrent put if absent
+                Set<Producer> handlersCreation = new CopyOnWriteArraySet<Producer>();
+                producers = producersByType.putIfAbsent(type, handlersCreation);
+                if (producers == null) {
+                    producers = handlersCreation;
+                }
+            }
+            final Producer producer = foundProducerMap.get(type);
+            producers.add(producer);
+        }
+    }
+
+    public void removeRegisterListener(Object listener) {
+        Map<Class<?>, Producer> foundProducerMap = ProducerFinder.findAllProducers(listener);
+        for (Map.Entry<Class<?>, Producer> entry : foundProducerMap.entrySet()) {
+            Set<Producer> currentProducers = producersByType.get(entry.getKey());
+            Producer producer = entry.getValue();
+
+            if (!currentProducers.contains(producer)) {
+                MMBusException.throwException("Missing event handler for an annotated method. Is " + listener.getClass()
+                        + " addRegisterListener?");
+            }
+
+            for (Producer currentProducer: currentProducers) {
+                if (currentProducer.equals(producer)) {
+                    currentProducer.invalidate();
+                    break;
+                }
+            }
+            currentProducers.remove(producer);
         }
     }
 
