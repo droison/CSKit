@@ -1,15 +1,14 @@
 package xyz.chaisong.mmanagercenter;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
-
-import android.util.Log;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by song on 15/6/14.
@@ -17,15 +16,13 @@ import android.util.Log;
 public class MManagerCenter {
     private static MManagerCenter defaultManagerCenter;
     private static boolean isDebugMode = true;
-    private final ReentrantLock lock;
-    private HashMap<String, MManagerInterface> hashMapManager;
+    private Map<String, MManagerInterface> hashMapManager;
     private Context context;
 
     private MManagerCenter()
     {
         log("MManagerCenter init");
-        lock = new ReentrantLock();
-        hashMapManager = new HashMap<>();
+        hashMapManager = new ConcurrentHashMap<>();
     }
 
     public static MManagerCenter init(Context context)
@@ -50,8 +47,6 @@ public class MManagerCenter {
 
     public static <T extends MManagerInterface> T getManager(Class<T> cls)
     {
-        defaultManagerCenter.lock.lock();
-
         T obj = (T) defaultManagerCenter.hashMapManager.get(cls.getName());
         if (obj == null)
         {
@@ -72,7 +67,6 @@ public class MManagerCenter {
             }
 
         }
-        defaultManagerCenter.lock.unlock();
 
         return obj;
     }
@@ -88,8 +82,6 @@ public class MManagerCenter {
      */
     public static <T extends MManagerInterface> void callInitManager(Class<T> cls, Context context)
     {
-        defaultManagerCenter.lock.lock();
-
         T obj = (T) defaultManagerCenter.hashMapManager.get(cls.getName());
         if (obj == null)
         {
@@ -108,7 +100,6 @@ public class MManagerCenter {
                 obj.onManagerInit(context != null ? context : defaultManagerCenter.context);
             }
         }
-        defaultManagerCenter.lock.unlock();
     }
 
     /**
@@ -120,21 +111,16 @@ public class MManagerCenter {
      */
     public static <T extends MManagerInterface> void removeManager(Class<T> cls)
     {
-        defaultManagerCenter.lock.lock();
-
         MManagerInterface obj = defaultManagerCenter.hashMapManager.get(cls.getName());
 
         if (obj == null)
         {
-            defaultManagerCenter.lock.unlock();
             return ;
         }
 
         defaultManagerCenter.hashMapManager.remove(cls.getName());
 
         obj.getManagerState().isManagerRemoved = true;
-
-        defaultManagerCenter.lock.unlock();
     }
 
     /**
@@ -142,9 +128,7 @@ public class MManagerCenter {
      */
     public static void callEnterForeground()
     {
-        defaultManagerCenter.lock.lock();
         Collection<MManagerInterface> arrayCopy = defaultManagerCenter.hashMapManager.values();
-        defaultManagerCenter.lock.unlock();
 
         Iterator<MManagerInterface> iterator = arrayCopy.iterator();
 
@@ -160,9 +144,7 @@ public class MManagerCenter {
      */
     public static void callEnterBackground()
     {
-        defaultManagerCenter.lock.lock();
         Collection<MManagerInterface> arrayCopy = defaultManagerCenter.hashMapManager.values();
-        defaultManagerCenter.lock.unlock();
 
         Iterator<MManagerInterface> iterator = arrayCopy.iterator();
 
@@ -178,9 +160,7 @@ public class MManagerCenter {
      */
     public static void callTerminate()
     {
-        defaultManagerCenter.lock.lock();
         Collection<MManagerInterface> arrayCopy = defaultManagerCenter.hashMapManager.values();
-        defaultManagerCenter.lock.unlock();
 
         Iterator<MManagerInterface> iterator = arrayCopy.iterator();
 
@@ -203,9 +183,7 @@ public class MManagerCenter {
 
     public static void callReloadData()
     {
-        defaultManagerCenter.lock.lock();
         Collection<MManagerInterface> arrayCopy = defaultManagerCenter.hashMapManager.values();
-        defaultManagerCenter.lock.unlock();
 
         Iterator<MManagerInterface> iterator = arrayCopy.iterator();
 
@@ -222,9 +200,7 @@ public class MManagerCenter {
      */
     public static void callClearData()
     {
-        defaultManagerCenter.lock.lock();
         Collection<MManagerInterface> arrayCopy = defaultManagerCenter.hashMapManager.values();
-        defaultManagerCenter.lock.unlock();
         Iterator<MManagerInterface> iterator = arrayCopy.iterator();
         while (iterator.hasNext())
         {
