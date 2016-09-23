@@ -40,7 +40,7 @@ public class MMBus extends MManager {
         producersByType.clear();
     }
 
-    private MMBus() {
+    public MMBus() {
         this(DEFAULT_IDENTIFIER);
     }
 
