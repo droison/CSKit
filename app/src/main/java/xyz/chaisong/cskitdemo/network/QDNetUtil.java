@@ -16,18 +16,17 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.OkHttpStack;
-import com.squareup.okhttp.OkHttpClient;
-
-import xyz.chaisong.cskitdemo.network.response.RespError;
-import xyz.chaisong.cskitdemo.network.request.ReqConfig;
-import xyz.chaisong.cskitdemo.network.request.ReqEntity;
-import xyz.chaisong.cskitdemo.network.request.ReqPrepare;
-import xyz.chaisong.cskitdemo.network.response.RespEntity;
-import xyz.chaisong.cskitdemo.network.response.RespBaseMeta;
 
 import java.io.File;
 import java.util.Map;
 import java.util.Set;
+
+import xyz.chaisong.cskitdemo.network.request.ReqConfig;
+import xyz.chaisong.cskitdemo.network.request.ReqEntity;
+import xyz.chaisong.cskitdemo.network.request.ReqPrepare;
+import xyz.chaisong.cskitdemo.network.response.RespBaseMeta;
+import xyz.chaisong.cskitdemo.network.response.RespEntity;
+import xyz.chaisong.cskitdemo.network.response.RespError;
 
 /**
  * Created by song on 15/11/27.
@@ -49,7 +48,7 @@ public class QDNetUtil {
         if (mQueue == null) {
             File cacheDir = mContext.getExternalCacheDir();
 
-            Network network = new BasicNetwork(new OkHttpStack(new OkHttpClient()));
+            Network network = new BasicNetwork(new OkHttpStack());
             mQueue = new RequestQueue(new DiskBasedCache(new File(cacheDir, "request")), network, 6);
             mQueue.start();
         }

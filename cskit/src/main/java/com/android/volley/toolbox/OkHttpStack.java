@@ -26,14 +26,17 @@ package com.android.volley.toolbox;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.support.VolleyResponse;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.RequestBody;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 /**
@@ -42,44 +45,43 @@ import java.util.concurrent.TimeUnit;
  */
 public class OkHttpStack implements HttpStack {
 
-    private final OkHttpClient mClient;
-
-    public OkHttpStack(OkHttpClient client) {
-        this.mClient = client;
+    public OkHttpStack() {
     }
 
     @Override
-    public VolleyResponse performRequest(Request<?> request, Map<String, String> additionalHeaders)
+    public VolleyResponse performRequest(com.android.volley.Request<?> request, Map<String, String> additionalHeaders)
             throws IOException, AuthFailureError {
 
-        OkHttpClient client = mClient.clone();
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
         int timeoutMs = request.getTimeoutMs();
-        client.setConnectTimeout(timeoutMs, TimeUnit.MILLISECONDS);
-        client.setReadTimeout(timeoutMs, TimeUnit.MILLISECONDS);
-        client.setWriteTimeout(timeoutMs, TimeUnit.MILLISECONDS);
 
-        com.squareup.okhttp.Request.Builder okHttpRequestBuilder = new com.squareup.okhttp.Request.Builder();
+        clientBuilder.connectTimeout(timeoutMs, TimeUnit.MILLISECONDS);
+        clientBuilder.readTimeout(timeoutMs, TimeUnit.MILLISECONDS);
+        clientBuilder.writeTimeout(timeoutMs, TimeUnit.MILLISECONDS);
+
+        okhttp3.Request.Builder okHttpRequestBuilder = new okhttp3.Request.Builder();
         okHttpRequestBuilder.url(request.getUrl());
 
         Map<String, String> headers = request.getHeaders();
-        for (final String name : headers.keySet()) {
+        for(final String name : headers.keySet()) {
             okHttpRequestBuilder.addHeader(name, headers.get(name));
         }
-        for (final String name : additionalHeaders.keySet()) {
+        for(final String name : additionalHeaders.keySet()) {
             okHttpRequestBuilder.addHeader(name, additionalHeaders.get(name));
         }
 
         setConnectionParametersForRequest(okHttpRequestBuilder, request);
 
-        com.squareup.okhttp.Request okHttpRequest = okHttpRequestBuilder.build();
+        OkHttpClient client = clientBuilder.build();
+        okhttp3.Request okHttpRequest = okHttpRequestBuilder.build();
         Call okHttpCall = client.newCall(okHttpRequest);
+        Response okHttpResponse = okHttpCall.execute();
 
-        return VolleyResponse.convertOKResponseToVolleyResponse(okHttpCall.execute());
+        return VolleyResponse.convertOKResponseToVolleyResponse(okHttpResponse);
     }
 
-
     @SuppressWarnings("deprecation")
-    private static void setConnectionParametersForRequest(com.squareup.okhttp.Request.Builder builder, Request<?> request)
+    private static void setConnectionParametersForRequest(okhttp3.Request.Builder builder, com.android.volley.Request<?> request)
             throws IOException, AuthFailureError {
         switch (request.getMethod()) {
             case Request.Method.DEPRECATED_GET_OR_POST:
@@ -118,9 +120,26 @@ public class OkHttpStack implements HttpStack {
         }
     }
 
+    private static VolleyResponse.ProtocolVersion parseProtocol(final Protocol p) {
+        switch (p) {
+            case HTTP_1_0:
+                return new VolleyResponse.ProtocolVersion("HTTP", 1, 0);
+            case HTTP_1_1:
+                return new VolleyResponse.ProtocolVersion("HTTP", 1, 1);
+            case SPDY_3:
+                return new VolleyResponse.ProtocolVersion("SPDY", 3, 1);
+            case HTTP_2:
+                return new VolleyResponse.ProtocolVersion("HTTP", 2, 0);
+        }
+
+        throw new IllegalAccessError("Unkwown protocol");
+    }
+
     private static RequestBody createRequestBody(Request r) throws AuthFailureError {
         final byte[] body = r.getBody();
-        if (body == null) return null;
+        if (body == null) {
+            return null;
+        }
 
         return RequestBody.create(MediaType.parse(r.getBodyContentType()), body);
     }

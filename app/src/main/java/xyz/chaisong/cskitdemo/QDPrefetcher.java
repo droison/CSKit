@@ -17,7 +17,6 @@ import com.android.volley.filedownload.FileDownloadListener;
 import com.android.volley.filedownload.FileDownloadManager;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.OkHttpStack;
-import com.squareup.okhttp.OkHttpClient;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -74,7 +73,7 @@ public class QDPrefetcher implements QDNetWorkCallBack<ArticleDetailEntity>, Fil
     public FileDownloadManager getFileDownloadManager() {
         if (mFileDownloadManager == null) {
             File dirFile = getPrefetcherFileCacheDir();
-            RequestQueue queue = new RequestQueue(new FileBasedCache(dirFile), new BasicNetwork(new OkHttpStack(new OkHttpClient())));
+            RequestQueue queue = new RequestQueue(new FileBasedCache(dirFile), new BasicNetwork(new OkHttpStack()));
             mFileDownloadManager = new FileDownloadManager(queue, prefetcherDelivery, 2);
             if (!dirFile.exists()) {
                 if (!dirFile.mkdirs()) {

@@ -35,7 +35,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.support.HttpStatus;
 import com.android.volley.support.VolleyResponse;
-import com.squareup.okhttp.internal.http.HttpDate;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +44,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.internal.http.HttpDate;
 
 /**
  * A network performing Volley requests over an {@link HttpStack}.
