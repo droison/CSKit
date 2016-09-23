@@ -1,5 +1,7 @@
 package xyz.chaisong.mmbus;
 
+import android.content.Context;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -15,8 +17,6 @@ import xyz.chaisong.mmanagercenter.MManager;
 
 public class MMBus extends MManager {
 
-    private static MMBus defaultBus;
-
     public static boolean isDebugMode = true;
 
     public static final String DEFAULT_IDENTIFIER = "DefaultBus";
@@ -28,11 +28,16 @@ public class MMBus extends MManager {
 
     private final String identifier;
 
-    public static synchronized MMBus getInstance() {
-        if (defaultBus == null) {
-            defaultBus = new MMBus();
-        }
-        return defaultBus;
+    @Override
+    public void onManagerInit(Context context) {
+        super.onManagerInit(context);
+    }
+
+    @Override
+    public void onManagerTerminate() {
+        super.onManagerTerminate();
+        mReceiverHandlerByInterface.clear();
+        producersByType.clear();
     }
 
     private MMBus() {
