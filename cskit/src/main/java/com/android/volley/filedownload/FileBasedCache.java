@@ -114,6 +114,9 @@ public class FileBasedCache implements Cache{
         }
         long before = 0;
         File[] files = mRootDirectory.listFiles();
+        if (files == null)
+            return;
+
         for (File file : files) {
             if (!file.isDirectory())
                 before += file.length();
