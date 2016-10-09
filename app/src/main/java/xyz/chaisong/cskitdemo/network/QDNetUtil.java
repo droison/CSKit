@@ -15,7 +15,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
-import com.android.volley.toolbox.OkHttpStack;
+import com.android.volley.toolbox.HurlStack;
 
 import java.io.File;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class QDNetUtil {
         if (mQueue == null) {
             File cacheDir = mContext.getExternalCacheDir();
 
-            Network network = new BasicNetwork(new OkHttpStack());
+            Network network = new BasicNetwork(new HurlStack());
             mQueue = new RequestQueue(new DiskBasedCache(new File(cacheDir, "request")), network, 6);
             mQueue.start();
         }
