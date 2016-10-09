@@ -19,10 +19,9 @@ package com.android.volley.toolbox;
 import com.android.volley.Cache;
 import com.android.volley.NetworkResponse;
 import com.android.volley.support.HTTP;
+import com.android.volley.support.HttpDate;
 
 import java.util.Map;
-
-import okhttp3.internal.http.HttpDate;
 
 /**
  * Utility methods for parsing HTTP headers.

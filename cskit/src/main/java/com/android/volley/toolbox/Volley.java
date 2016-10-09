@@ -49,7 +49,7 @@ public class Volley {
         }
 
         if (stack == null) {
-            stack = new OkHttpStack();
+            stack = new HurlStack();
         }
 
         Network network = new BasicNetwork(stack);
