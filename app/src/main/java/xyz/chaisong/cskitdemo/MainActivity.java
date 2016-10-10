@@ -1,5 +1,7 @@
 package xyz.chaisong.cskitdemo;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import xyz.chaisong.cskitdemo.IDLBus.BusIDLService;
 import xyz.chaisong.cskitdemo.network.QDNetUtil;
 
 public class MainActivity extends AppCompatActivity {
@@ -17,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        startService(new Intent(this, BusIDLService.class));
+
         QDNetUtil.init(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -33,26 +39,26 @@ public class MainActivity extends AppCompatActivity {
 
         QDPrefetcher prefetcher = new QDPrefetcher(this);
 
-        prefetcher.add(25268);
-        prefetcher.add(25256);
-        prefetcher.add(25203);
-        prefetcher.add(25155);
-        prefetcher.add(25045);
-        prefetcher.add(25252);
+        prefetcher.add(29158);
+        prefetcher.add(29016);
+        prefetcher.add(28657);
+        prefetcher.add(28516);
+        prefetcher.add(28848);
+        prefetcher.add(28960);
 
-        prefetcher.add(25268);
-        prefetcher.add(25256);
-        prefetcher.add(25203);
-        prefetcher.add(25155);
-        prefetcher.add(25045);
-        prefetcher.add(25252);
+        prefetcher.add(29158);
+        prefetcher.add(29016);
+        prefetcher.add(28657);
+        prefetcher.add(28516);
+        prefetcher.add(28848);
+        prefetcher.add(28960);
 
-        prefetcher.add(25268);
-        prefetcher.add(25256);
-        prefetcher.add(25203);
-        prefetcher.add(25155);
-        prefetcher.add(25045);
-        prefetcher.add(25252);
+        prefetcher.add(29158);
+        prefetcher.add(29016);
+        prefetcher.add(28657);
+        prefetcher.add(28516);
+        prefetcher.add(28848);
+        prefetcher.add(28960);
 
     }
 
