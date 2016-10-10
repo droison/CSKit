@@ -30,7 +30,7 @@
             android:process="process2"/>
 
         <service
-            android:name=".IDLBus.BusIDLService"
+            android:name=".idlBus.BusIDLService"
             android:enabled="true"
             android:exported="true"></service>
     </application>

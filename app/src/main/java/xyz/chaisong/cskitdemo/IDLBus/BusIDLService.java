@@ -1,4 +1,4 @@
-package xyz.chaisong.cskitdemo.IDLBus;
+package xyz.chaisong.cskitdemo.idlBus;
 
 import android.app.Service;
 import android.content.Intent;

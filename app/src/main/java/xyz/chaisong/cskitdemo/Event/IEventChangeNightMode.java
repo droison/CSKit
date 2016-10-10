@@ -1,4 +1,4 @@
-package xyz.chaisong.cskitdemo.Event;
+package xyz.chaisong.cskitdemo.event;
 
 /**
  * Created by song on 16/10/10.

@@ -1,8 +1,8 @@
 // IBusAidlInterface.aidl
-package xyz.chaisong.cskitdemo.IDLBus;
+package xyz.chaisong.cskitdemo.idlBus;
 
-import xyz.chaisong.cskitdemo.IDLBus.EventHolder;
-import xyz.chaisong.cskitdemo.IDLBus.ICallBack;
+import xyz.chaisong.cskitdemo.idlBus.EventHolder;
+import xyz.chaisong.cskitdemo.idlBus.ICallBack;
 // Declare any non-default types here with import statements
 
 interface IBusAidlInterface {

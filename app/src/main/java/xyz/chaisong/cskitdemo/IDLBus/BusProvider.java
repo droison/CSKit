@@ -1,4 +1,4 @@
-package xyz.chaisong.cskitdemo.IDLBus;
+package xyz.chaisong.cskitdemo.idlBus;
 
 import android.content.ComponentName;
 import android.content.ServiceConnection;
@@ -62,7 +62,8 @@ public class BusProvider implements IMMBus{
     }
 
     public static void init(){
-        busProvider = new BusProvider();
+        if (busProvider == null)
+            busProvider = new BusProvider();
     }
 
     public static IMMBus getBus(){

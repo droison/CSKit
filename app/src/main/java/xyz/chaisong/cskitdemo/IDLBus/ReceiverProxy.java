@@ -1,6 +1,5 @@
-package xyz.chaisong.cskitdemo.IDLBus;
+package xyz.chaisong.cskitdemo.idlBus;
 
-import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 

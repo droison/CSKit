@@ -1,4 +1,4 @@
-package xyz.chaisong.cskitdemo.IDLBus;
+package xyz.chaisong.cskitdemo.idlBus;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -76,9 +76,8 @@ public class EventHolder implements Parcelable {
         } else {
             dest.writeInt(mArgs.length);
             for (Object arg: mArgs) {
-                dest.writeParcelable(arg, 0);
+                dest.writeParcelable((Parcelable) arg, 0);
             }
-            dest.writeArray(mArgs);
         }
     }
 
