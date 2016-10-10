@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import xyz.chaisong.cskitdemo.idlBus.BusIDLService;
+import xyz.chaisong.cskitdemo.idlbus.BusIDLService;
 import xyz.chaisong.cskitdemo.network.QDNetUtil;
 
 public class MainActivity extends AppCompatActivity {
