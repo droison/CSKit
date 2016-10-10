@@ -1,7 +1,9 @@
 package xyz.chaisong.mmbus;
 
 import android.content.Context;
+import android.util.Log;
 
+import java.lang.reflect.InvocationHandler;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +17,7 @@ import xyz.chaisong.mmanagercenter.MManager;
  * Created by song on 16/9/14.
  */
 
-public class MMBus extends MManager {
+public class MMBus extends MManager implements IMMBus{
 
     public static boolean isDebugMode = true;
 
@@ -57,6 +59,7 @@ public class MMBus extends MManager {
      * @param targetInterface 目标接口
      * @param receiver   接口对应的实现，具体的要注册的，一个类可以注册和反注册多个接口
      */
+    @Override
     public <T> void register(Class<T> targetInterface, T receiver) {
         if (!targetInterface.isInterface())
             MMBusException.throwException("register keyClass must be a interface");
@@ -88,6 +91,7 @@ public class MMBus extends MManager {
      * @param targetInterface 目标接口
      * @param receiver   接口对应的实现，具体的要反注册的，一个类可以注册和反注册多个接口
      */
+    @Override
     public <T> void unregister(Class<T> targetInterface, T receiver) {
 
         if (!targetInterface.isInterface())
@@ -109,6 +113,7 @@ public class MMBus extends MManager {
     /**
      * @param receiver   接口对应的实现，具体的要反注册的，一个类可以注册和反注册多个接口
      */
+    @Override
     public <T> void unregister(T receiver) {
         if (receiver == null) {
             MMBusException.throwException("Object to register must not be null.");
@@ -127,6 +132,7 @@ public class MMBus extends MManager {
         }
     }
 
+    @Override
     public void addRegisterListener(Object listener) {
         //OnSubscribe遍历,将其封装成Producer存到producersByType中
         Map<Class<?>, Producer> foundProducerMap = ProducerFinder.findAllProducers(listener);
@@ -145,6 +151,7 @@ public class MMBus extends MManager {
         }
     }
 
+    @Override
     public void removeRegisterListener(Object listener) {
         Map<Class<?>, Producer> foundProducerMap = ProducerFinder.findAllProducers(listener);
         for (Map.Entry<Class<?>, Producer> entry : foundProducerMap.entrySet()) {
@@ -166,6 +173,7 @@ public class MMBus extends MManager {
         }
     }
 
+    @Override
     public <T> T getReceiver(Class<T> targetInterface) {
         if(!targetInterface.isInterface()) {
             MMBusException.throwException(String.format("receiverType must be a interface , %s is not a interface",targetInterface.getName()));
@@ -179,5 +187,12 @@ public class MMBus extends MManager {
         }
 
         return receiverHandler.mReceiverProxy;
+    }
+
+    public InvocationHandler getReceiverProxy(Class receiverInterface){
+        if(!receiverInterface.isInterface()) {
+            MMBusException.throwException(String.format("receiverType must be a interface , %s is not a interface",receiverInterface.getName()));
+        }
+        return mReceiverHandlerByInterface.get(receiverInterface);
     }
 }
