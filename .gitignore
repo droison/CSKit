@@ -12,3 +12,4 @@ cskit/build
 gradlew
 cskit/gradle/wrapper
 gradlew.bat
+.idea
