@@ -25,9 +25,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".Process1Activity"
-            android:process="process1"/>
+            android:process=":process1"/>
         <activity android:name=".Process2Activity"
-            android:process="process2"/>
+            android:process=":process2"/>
 
         <service
             android:name=".idlbus.BusIDLService"

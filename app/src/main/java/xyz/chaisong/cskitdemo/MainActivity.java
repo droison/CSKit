@@ -3,22 +3,28 @@ package xyz.chaisong.cskitdemo;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
+import xyz.chaisong.cskitdemo.event.IEventChangeNightMode;
 import xyz.chaisong.cskitdemo.idlbus.BusIDLService;
+import xyz.chaisong.cskitdemo.idlbus.BusProvider;
 import xyz.chaisong.cskitdemo.network.QDNetUtil;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements IEventChangeNightMode{
+
+    private boolean isNightMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BusProvider.init();
 
         startService(new Intent(this, BusIDLService.class));
 
@@ -30,8 +36,12 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this,Process1Activity.class);
+                startActivity(intent);
             }
         });
 
@@ -59,6 +69,18 @@ public class MainActivity extends AppCompatActivity {
         prefetcher.add(28848);
         prefetcher.add(28960);
 
+        registerBus();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Toast.makeText(this,"NightMode:"+isNightMode,Toast.LENGTH_LONG).show();
+    }
+
+    private void registerBus() {
+        BusProvider.getBus().register(IEventChangeNightMode.class,this);
     }
 
     @Override
@@ -81,5 +103,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void changeNightMode(boolean isNight) {
+        isNightMode = isNight;
+//
     }
 }
