@@ -24,9 +24,10 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BusProvider.init();
-
         startService(new Intent(this, BusIDLService.class));
+
+        BusProvider.init(this);
+
 
         QDNetUtil.init(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
             }
         });
 
-
+/**
         QDPrefetcher prefetcher = new QDPrefetcher(this);
 
         prefetcher.add(29158);
@@ -69,8 +70,13 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
         prefetcher.add(28848);
         prefetcher.add(28960);
 
-        registerBus();
+**/
 
+        registerBus();
+    }
+
+    public void sendBus(View view) {
+        BusProvider.getBus().getReceiver(IEventChangeNightMode.class).changeNightMode(true);
     }
 
     @Override
@@ -106,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
     }
 
     @Override
-    public void changeNightMode(boolean isNight) {
+    public void changeNightMode(Boolean isNight) {
         isNightMode = isNight;
 //
     }
