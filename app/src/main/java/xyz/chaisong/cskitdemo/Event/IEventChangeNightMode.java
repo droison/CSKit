@@ -5,5 +5,5 @@ package xyz.chaisong.cskitdemo.event;
  */
 
 public interface IEventChangeNightMode {
-    void changeNightMode(String isNight);
+    void change(Boolean arg1, boolean arg2, Integer arg3, int arg4, String arg5);
 }

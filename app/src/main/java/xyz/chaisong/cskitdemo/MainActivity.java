@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,8 +17,7 @@ import xyz.chaisong.cskitdemo.idlbus.BusProvider;
 import xyz.chaisong.cskitdemo.network.QDNetUtil;
 
 public class MainActivity extends AppCompatActivity implements IEventChangeNightMode{
-
-    private String isNightMode = "日间";
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,13 +76,7 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
     }
 
     public void sendBus(View view) {
-        BusProvider.getBus().getReceiver(IEventChangeNightMode.class).changeNightMode("Main夜间");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Toast.makeText(this,"NightMode:"+isNightMode,Toast.LENGTH_LONG).show();
+        BusProvider.getBus().getReceiver(IEventChangeNightMode.class).change(null, true, 0, 2, "main");
     }
 
     private void registerBus() {
@@ -112,8 +106,7 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
     }
 
     @Override
-    public void changeNightMode(String isNight) {
-        isNightMode = isNight;
-//
+    public void change(Boolean arg1, boolean arg2, Integer arg3, int arg4, String arg5) {
+        Log.i(TAG, "change: arg1=" + arg1 + ", arg2=" + arg2 + ", arg3=" + arg3 + ", arg4=" + arg4 + ", arg5=" + arg5);
     }
 }
