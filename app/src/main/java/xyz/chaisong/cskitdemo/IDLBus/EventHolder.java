@@ -112,4 +112,14 @@ public class EventHolder implements Parcelable {
     @Override public int describeContents() {
         return 0;
     }
+
+    @Override
+    public String toString() {
+        return "EventHolder{" +
+                "mClassName=" + mClassName +
+                ", mMethodName=" + mMethodName +
+                ", mParameterTypesName=" + mParameterTypesName +
+                ", mArgs=" + mArgs +
+                '}';
+    }
 }
