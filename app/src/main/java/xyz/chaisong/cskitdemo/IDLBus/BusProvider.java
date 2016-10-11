@@ -20,29 +20,25 @@ import xyz.chaisong.mmbus.MMBus;
  * Created by song on 16/10/10.
  */
 
-public class BusProvider implements IMMBus{
+public class BusProvider extends ICallBack.Stub implements IMMBus{
     private static final String TAG = "BusProvider";
 
     private static BusProvider busProvider;
 
     //每个进程一个aidlService 一个callback 一个Bus
     private IBusAidlInterface mService;
-    private CallBack mCallBack;
     private ServiceConnection serviceConnection;
 
     private MMBus mmBus;
 
-    private ReceiverProxy mReceiverProxy;
-
-    private BusProvider(Activity activity){
-        mCallBack = new CallBack();
+    private BusProvider(Context context){
         mmBus = new MMBus("["+ Process.myPid() +"]MMBus" );
         serviceConnection = new ServiceConnection() {
 
             @Override public void onServiceDisconnected(ComponentName name) {
                 Log.i(TAG, "onServiceDisconnected");
                 try {
-                    mService.detach(mCallBack);
+                    mService.detach(BusProvider.this);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -58,18 +54,24 @@ public class BusProvider implements IMMBus{
                 }
                 // set call back
                 try {
-                    mService.attach(mCallBack);
+                    mService.attach(BusProvider.this);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
             }
         };
-        activity.bindService(new Intent(activity, BusIDLService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+        context.bindService(new Intent(context, BusIDLService.class), serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    public static void init(Activity activity){
+    public static void create(Context context){
         if (busProvider == null)
-            busProvider = new BusProvider(activity);
+            busProvider = new BusProvider(context);
+    }
+
+    public static void exit(Context context){
+        if (busProvider != null) {
+            context.unbindService(busProvider.serviceConnection);
+        }
     }
 
     public static IMMBus getBus(){
@@ -93,8 +95,9 @@ public class BusProvider implements IMMBus{
 
     @Override
     public <T> T getReceiver(Class<T> targetInterface) {
-        mReceiverProxy = new ReceiverProxy(targetInterface, mService);
-        return mReceiverProxy.getProxyObject(targetInterface);
+        Log.i(TAG, System.currentTimeMillis() + " getReceiver() called with: targetInterface = [" + targetInterface + "]");
+        ReceiverProxy receiverProxy = new ReceiverProxy(targetInterface, mService);
+        return receiverProxy.getProxyObject(targetInterface);
     }
 
     @Override
@@ -107,29 +110,25 @@ public class BusProvider implements IMMBus{
         mmBus.removeRegisterListener(listener);
     }
 
-    // client callback
-    private class CallBack extends ICallBack.Stub {
-        
-        @Override
-        public void invoke(EventHolder eventHolder) throws RemoteException {
-            InvocationHandler handler = null;
-            Method method = null;
-            try {
-                Class receiverClass = Class.forName(eventHolder.getClassName());
-                method = receiverClass.getDeclaredMethod(eventHolder.getMethodName(), convertParametersType(eventHolder.getParameterTypesName()));
-                handler = mmBus.getReceiverProxy(receiverClass);
-            } catch (ClassNotFoundException e) {
-                Log.e(TAG, "invoke: ", e);
-            } catch (NoSuchMethodException e) {
-                Log.e(TAG, "invoke: ", e);
-            }
+    @Override
+    public void invoke(EventHolder eventHolder) throws RemoteException {
+        InvocationHandler handler = null;
+        Method method = null;
+        try {
+            Class receiverClass = Class.forName(eventHolder.getClassName());
+            method = receiverClass.getDeclaredMethod(eventHolder.getMethodName(), convertParametersType(eventHolder.getParameterTypesName()));
+            handler = mmBus.getReceiverProxy(receiverClass);
+        } catch (ClassNotFoundException e) {
+            Log.e(TAG, "invoke: ", e);
+        } catch (NoSuchMethodException e) {
+            Log.e(TAG, "invoke: ", e);
+        }
 
-            if (handler != null && method != null) {
-                try {
-                    handler.invoke(null, method, eventHolder.getArgs());
-                } catch (Throwable e) {
-                    Log.e(TAG, "invoke: ", e);
-                }
+        if (handler != null && method != null) {
+            try {
+                handler.invoke(null, method, eventHolder.getArgs());
+            } catch (Throwable e) {
+                Log.e(TAG, "invoke: ", e);
             }
         }
     }

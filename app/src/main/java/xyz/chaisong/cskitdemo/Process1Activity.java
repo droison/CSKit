@@ -19,8 +19,6 @@ public class Process1Activity extends AppCompatActivity implements IEventChangeN
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_process1);
 
-        BusProvider.init(this);
-
         mSendBtn = (Button) findViewById(R.id.btn_send);
         mSendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -34,7 +32,13 @@ public class Process1Activity extends AppCompatActivity implements IEventChangeN
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BusProvider.getBus().unregister(this);
+    }
+
+    @Override
     public void change(Boolean arg1, boolean arg2, Integer arg3, int arg4, String arg5) {
-        Log.i(TAG, "change: arg1=" + arg1 + ", arg2=" + arg2 + ", arg3=" + arg3 + ", arg4=" + arg4 + ", arg5=" + arg5);
+        Log.i(TAG, System.currentTimeMillis() + " change() called with: arg1 = [" + arg1 + "], arg2 = [" + arg2 + "], arg3 = [" + arg3 + "], arg4 = [" + arg4 + "], arg5 = [" + arg5 + "]");
     }
 }

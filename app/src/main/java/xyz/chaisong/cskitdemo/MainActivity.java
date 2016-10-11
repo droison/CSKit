@@ -26,9 +26,6 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
 
         startService(new Intent(this, BusIDLService.class));
 
-        BusProvider.init(this);
-
-
         QDNetUtil.init(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -84,6 +81,13 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BusProvider.getBus().unregister(this);
+    }
+
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -107,6 +111,6 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
 
     @Override
     public void change(Boolean arg1, boolean arg2, Integer arg3, int arg4, String arg5) {
-        Log.i(TAG, "change: arg1=" + arg1 + ", arg2=" + arg2 + ", arg3=" + arg3 + ", arg4=" + arg4 + ", arg5=" + arg5);
+        Log.i(TAG, System.currentTimeMillis() + " change() called with: arg1 = [" + arg1 + "], arg2 = [" + arg2 + "], arg3 = [" + arg3 + "], arg4 = [" + arg4 + "], arg5 = [" + arg5 + "]");
     }
 }
