@@ -1,5 +1,6 @@
 package xyz.chaisong.mmbus.aidl;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.util.Log;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import xyz.chaisong.mmbus.IMMBus;
 import xyz.chaisong.mmbus.MMBus;
@@ -31,6 +33,10 @@ public class BusProvider extends ICallBack.Stub implements IMMBus{
     private MMBus mmBus;
 
     private BusProvider(Context context){
+        if (isMainProcess(context)) {
+            context.startService(new Intent(context, BusIDLService.class));
+        }
+
         mmBus = new MMBus("["+ Process.myPid() +"]MMBus" );
         serviceConnection = new ServiceConnection() {
 
@@ -130,6 +136,19 @@ public class BusProvider extends ICallBack.Stub implements IMMBus{
                 Log.e(TAG, "invoke: ", e);
             }
         }
+    }
+
+    private boolean isMainProcess(Context context) {
+        ActivityManager am = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE));
+        List<ActivityManager.RunningAppProcessInfo> processInfos = am.getRunningAppProcesses();
+        String mainProcessName = context.getPackageName();
+        int myPid = Process.myPid();
+        for (ActivityManager.RunningAppProcessInfo info : processInfos) {
+            if (info.pid == myPid && mainProcessName.equals(info.processName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Class<?>[] convertParametersType(String[] paramStrings) throws ClassNotFoundException{
