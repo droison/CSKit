@@ -24,8 +24,6 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        startService(new Intent(this, BusIDLService.class));
-
         QDNetUtil.init(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
