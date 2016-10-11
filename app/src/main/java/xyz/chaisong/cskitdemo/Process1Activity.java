@@ -22,7 +22,7 @@ public class Process1Activity extends AppCompatActivity {
         mSendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BusProvider.getBus().getReceiver(IEventChangeNightMode.class).changeNightMode(true);
+                BusProvider.getBus().getReceiver(IEventChangeNightMode.class).changeNightMode("Process1夜间");
             }
         });
     }

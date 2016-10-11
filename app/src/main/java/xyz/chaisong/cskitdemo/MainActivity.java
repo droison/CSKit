@@ -17,7 +17,7 @@ import xyz.chaisong.cskitdemo.network.QDNetUtil;
 
 public class MainActivity extends AppCompatActivity implements IEventChangeNightMode{
 
-    private boolean isNightMode;
+    private String isNightMode = "日间";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
     }
 
     public void sendBus(View view) {
-        BusProvider.getBus().getReceiver(IEventChangeNightMode.class).changeNightMode(true);
+        BusProvider.getBus().getReceiver(IEventChangeNightMode.class).changeNightMode("Main夜间");
     }
 
     @Override
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
     }
 
     @Override
-    public void changeNightMode(Boolean isNight) {
+    public void changeNightMode(String isNight) {
         isNightMode = isNight;
 //
     }
