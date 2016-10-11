@@ -19,17 +19,19 @@ public class ReceiverProxy implements InvocationHandler {
 
     private IBusAidlInterface mService;
 
-    public ReceiverProxy(String targetInterfaceName, IBusAidlInterface service) {
-        mTargetInterface = targetInterfaceName;
+    public ReceiverProxy(Class targetInterface, IBusAidlInterface service) {
+        this.mReceiverProxy = Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class[] {targetInterface}, this);
+        mTargetInterface = targetInterface.getName();
         mService = service;
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
+
+        EventHolder eventHolder = new EventHolder(mTargetInterface, method, args);
         //此处肯定在当前进程处理,请转发各种Bus
         if (mService != null) {
             try {
-                EventHolder eventHolder = new EventHolder(mTargetInterface, method, args);
                 mService.invokeEvent(eventHolder);
             } catch (RemoteException e) {
                 Log.e(TAG, "invoke: ", e);
@@ -39,12 +41,6 @@ public class ReceiverProxy implements InvocationHandler {
     }
 
     public <T> T getProxyObject(Class<T> targetInterface) {
-        if (!targetInterface.isInterface() || !(targetInterface.getName().equals(mTargetInterface))) {
-            throw new RuntimeException("");
-        }
-        if (this.mReceiverProxy == null)
-            this.mReceiverProxy = Proxy.newProxyInstance(targetInterface.getClassLoader(), new Class[] {targetInterface}, this);
-
         return (T)mReceiverProxy;
     }
 }

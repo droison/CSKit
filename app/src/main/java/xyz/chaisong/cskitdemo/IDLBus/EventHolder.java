@@ -3,8 +3,12 @@ package xyz.chaisong.cskitdemo.idlbus;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.util.SparseArray;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by song on 16/10/10.
@@ -41,7 +45,9 @@ public class EventHolder implements Parcelable {
         int length = in.readInt();
         if(length > 0){
             mParameterTypesName = new String[length];
-            in.readStringArray(mParameterTypesName);
+            for (int i=0; i<length; i++) {
+                mParameterTypesName[i] = in.readString();
+            }
         }
 
         int argLength = in.readInt();
@@ -76,7 +82,58 @@ public class EventHolder implements Parcelable {
         } else {
             dest.writeInt(mArgs.length);
             for (Object arg: mArgs) {
-                dest.writeParcelable((Parcelable) arg, 0);
+                writeValue(dest, arg);
+            }
+        }
+    }
+
+    private void writeValue(Parcel dest, Object v) {
+        if (v == null) {
+            dest.writeInt(0);
+        } else if (v instanceof String) {
+            dest.writeString((String) v);
+        } else if (v instanceof Integer) {
+            dest.writeInt((Integer) v);
+        } else if (v instanceof Map) {
+            dest.writeMap((Map) v);
+        } else if (v instanceof Parcelable) {
+            dest.writeParcelable((Parcelable) v, 0);
+        } else if (v instanceof Short) {
+            dest.writeInt(((Short) v).intValue());
+        } else if (v instanceof Long) {
+            dest.writeLong((Long) v);
+        } else if (v instanceof Float) {
+            dest.writeFloat((Float) v);
+        } else if (v instanceof Double) {
+            dest.writeDouble((Double) v);
+        } else if (v instanceof Boolean) {
+            dest.writeInt((Boolean) v ? 1 : 0);
+        } else if (v instanceof List) {
+            dest.writeList((List) v);
+        } else if (v instanceof SparseArray) {
+            dest.writeSparseArray((SparseArray) v);
+        } else if (v instanceof boolean[]) {
+            dest.writeBooleanArray((boolean[]) v);
+        } else if (v instanceof byte[]) {
+            dest.writeByteArray((byte[]) v);
+        } else if (v instanceof String[]) {
+            dest.writeStringArray((String[]) v);
+        } else if (v instanceof Parcelable[]) {
+            dest.writeParcelableArray((Parcelable[]) v, 0);
+        } else if (v instanceof int[]) {
+            dest.writeIntArray((int[]) v);
+        } else if (v instanceof long[]) {
+            dest.writeLongArray((long[]) v);
+        } else if (v instanceof Byte) {
+            dest.writeInt((Byte) v);
+        } else {
+            Class<?> clazz = v.getClass();
+            if (clazz.isArray() && clazz.getComponentType() == Object.class) {
+                dest.writeArray((Object[]) v);
+            } else if (v instanceof Serializable) {
+                dest.writeSerializable((Serializable) v);
+            } else {
+                throw new RuntimeException("Parcel: unable to marshal value " + v);
             }
         }
     }

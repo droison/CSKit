@@ -1,6 +1,9 @@
 package xyz.chaisong.cskitdemo.idlbus;
 
+import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Process;
@@ -29,7 +32,9 @@ public class BusProvider implements IMMBus{
 
     private MMBus mmBus;
 
-    private BusProvider(){
+    private ReceiverProxy mReceiverProxy;
+
+    private BusProvider(Activity activity){
         mCallBack = new CallBack();
         mmBus = new MMBus("["+ Process.myPid() +"]MMBus" );
         serviceConnection = new ServiceConnection() {
@@ -59,11 +64,12 @@ public class BusProvider implements IMMBus{
                 }
             }
         };
+        activity.bindService(new Intent(activity, BusIDLService.class), serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    public static void init(){
+    public static void init(Activity activity){
         if (busProvider == null)
-            busProvider = new BusProvider();
+            busProvider = new BusProvider(activity);
     }
 
     public static IMMBus getBus(){
@@ -87,7 +93,8 @@ public class BusProvider implements IMMBus{
 
     @Override
     public <T> T getReceiver(Class<T> targetInterface) {
-        return new ReceiverProxy(targetInterface.getName(), mService).getProxyObject(targetInterface);
+        mReceiverProxy = new ReceiverProxy(targetInterface, mService);
+        return mReceiverProxy.getProxyObject(targetInterface);
     }
 
     @Override
@@ -109,7 +116,7 @@ public class BusProvider implements IMMBus{
             Method method = null;
             try {
                 Class receiverClass = Class.forName(eventHolder.getClassName());
-                method = receiverClass.getMethod(eventHolder.getMethodName(), convertParametersType(eventHolder.getParameterTypesName()));
+                method = receiverClass.getDeclaredMethod(eventHolder.getMethodName(), convertParametersType(eventHolder.getParameterTypesName()));
                 handler = mmBus.getReceiverProxy(receiverClass);
             } catch (ClassNotFoundException e) {
                 Log.e(TAG, "invoke: ", e);
