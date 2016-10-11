@@ -1,6 +1,5 @@
-package xyz.chaisong.cskitdemo.idlbus;
+package xyz.chaisong.mmbus.aidl;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

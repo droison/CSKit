@@ -1,4 +1,4 @@
-package xyz.chaisong.cskitdemo.idlbus;
+package xyz.chaisong.mmbus.aidl;
 
 import android.os.RemoteException;
 import android.util.Log;

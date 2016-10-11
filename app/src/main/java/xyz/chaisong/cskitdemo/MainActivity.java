@@ -9,11 +9,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import xyz.chaisong.cskitdemo.event.IEventChangeNightMode;
-import xyz.chaisong.cskitdemo.idlbus.BusIDLService;
-import xyz.chaisong.cskitdemo.idlbus.BusProvider;
+import xyz.chaisong.mmbus.aidl.BusProvider;
 import xyz.chaisong.cskitdemo.network.QDNetUtil;
 
 public class MainActivity extends AppCompatActivity implements IEventChangeNightMode{

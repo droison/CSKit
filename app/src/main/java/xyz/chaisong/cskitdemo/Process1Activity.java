@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import xyz.chaisong.cskitdemo.event.IEventChangeNightMode;
-import xyz.chaisong.cskitdemo.idlbus.BusProvider;
+import xyz.chaisong.mmbus.aidl.BusProvider;
 
 public class Process1Activity extends AppCompatActivity implements IEventChangeNightMode{
 

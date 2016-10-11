@@ -9,8 +9,8 @@ import android.util.Log;
 
 import java.util.List;
 
-import xyz.chaisong.cskitdemo.idlbus.BusIDLService;
-import xyz.chaisong.cskitdemo.idlbus.BusProvider;
+import xyz.chaisong.mmbus.aidl.BusIDLService;
+import xyz.chaisong.mmbus.aidl.BusProvider;
 
 /**
  * Created by song on 16/10/11.

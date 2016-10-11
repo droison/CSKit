@@ -1,7 +1,7 @@
 // ICallBack.aidl
-package xyz.chaisong.cskitdemo.idlbus;
+package xyz.chaisong.mmbus.aidl;
 
-import xyz.chaisong.cskitdemo.idlbus.EventHolder;
+import xyz.chaisong.mmbus.aidl.EventHolder;
 
 interface ICallBack {
     void invoke(in EventHolder eventHolder);

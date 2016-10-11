@@ -31,7 +31,7 @@
             android:process=":process2"/>
 
         <service
-            android:name=".idlbus.BusIDLService"
+            android:name="xyz.chaisong.mmbus.aidl.BusIDLService"
             android:enabled="true"
             android:exported="true"/>
     </application>

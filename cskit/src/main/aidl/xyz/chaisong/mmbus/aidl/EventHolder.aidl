@@ -1,7 +1,7 @@
 // IBusAidlInterface.aidl
-package xyz.chaisong.cskitdemo.idlbus;
+package xyz.chaisong.mmbus.aidl;
 
 // Declare any non-default types here with import statements
-import xyz.chaisong.cskitdemo.idlbus.EventHolder;
+import xyz.chaisong.mmbus.aidl.EventHolder;
 
 parcelable EventHolder;

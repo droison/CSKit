@@ -1,14 +1,9 @@
-package xyz.chaisong.cskitdemo.idlbus;
+package xyz.chaisong.mmbus.aidl;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
-import android.util.SparseArray;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by song on 16/10/10.
