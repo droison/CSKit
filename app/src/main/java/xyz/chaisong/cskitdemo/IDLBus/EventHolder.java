@@ -52,14 +52,7 @@ public class EventHolder implements Parcelable {
 
         int argLength = in.readInt();
         if (argLength > 0 && argLength == length) { //必须一致才能传参,并且进行确认是否能使用
-            mArgs = new Object[length];
-            for (int i = 0; i < argLength; i++) {
-                try {
-                    mArgs[i] = in.readParcelable(Class.forName(mParameterTypesName[i]).getClassLoader());
-                } catch (ClassNotFoundException e) {
-                    Log.e(TAG, "EventHolder: ", e);
-                }
-            }
+            mArgs = in.readArray(EventHolder.class.getClassLoader());
         }
     }
 
@@ -81,60 +74,7 @@ public class EventHolder implements Parcelable {
             dest.writeInt(0);
         } else {
             dest.writeInt(mArgs.length);
-            for (Object arg: mArgs) {
-                writeValue(dest, arg);
-            }
-        }
-    }
-
-    private void writeValue(Parcel dest, Object v) {
-        if (v == null) {
-            dest.writeInt(0);
-        } else if (v instanceof String) {
-            dest.writeString((String) v);
-        } else if (v instanceof Integer) {
-            dest.writeInt((Integer) v);
-        } else if (v instanceof Map) {
-            dest.writeMap((Map) v);
-        } else if (v instanceof Parcelable) {
-            dest.writeParcelable((Parcelable) v, 0);
-        } else if (v instanceof Short) {
-            dest.writeInt(((Short) v).intValue());
-        } else if (v instanceof Long) {
-            dest.writeLong((Long) v);
-        } else if (v instanceof Float) {
-            dest.writeFloat((Float) v);
-        } else if (v instanceof Double) {
-            dest.writeDouble((Double) v);
-        } else if (v instanceof Boolean) {
-            dest.writeInt((Boolean) v ? 1 : 0);
-        } else if (v instanceof List) {
-            dest.writeList((List) v);
-        } else if (v instanceof SparseArray) {
-            dest.writeSparseArray((SparseArray) v);
-        } else if (v instanceof boolean[]) {
-            dest.writeBooleanArray((boolean[]) v);
-        } else if (v instanceof byte[]) {
-            dest.writeByteArray((byte[]) v);
-        } else if (v instanceof String[]) {
-            dest.writeStringArray((String[]) v);
-        } else if (v instanceof Parcelable[]) {
-            dest.writeParcelableArray((Parcelable[]) v, 0);
-        } else if (v instanceof int[]) {
-            dest.writeIntArray((int[]) v);
-        } else if (v instanceof long[]) {
-            dest.writeLongArray((long[]) v);
-        } else if (v instanceof Byte) {
-            dest.writeInt((Byte) v);
-        } else {
-            Class<?> clazz = v.getClass();
-            if (clazz.isArray() && clazz.getComponentType() == Object.class) {
-                dest.writeArray((Object[]) v);
-            } else if (v instanceof Serializable) {
-                dest.writeSerializable((Serializable) v);
-            } else {
-                throw new RuntimeException("Parcel: unable to marshal value " + v);
-            }
+            dest.writeArray(mArgs);
         }
     }
 
