@@ -121,7 +121,7 @@ public class BusProvider extends ICallBack.Stub implements IMMBus{
         Method method = null;
         try {
             Class receiverClass = Class.forName(eventHolder.getClassName());
-            method = receiverClass.getDeclaredMethod(eventHolder.getMethodName(), convertParametersType(eventHolder.getParameterTypesName()));
+            method = receiverClass.getDeclaredMethod(eventHolder.getMethodName(), eventHolder.getParametersType());
             handler = mmBus.getReceiverProxy(receiverClass);
         } catch (ClassNotFoundException e) {
             Log.e(TAG, "invoke: ", e);
@@ -149,39 +149,5 @@ public class BusProvider extends ICallBack.Stub implements IMMBus{
             }
         }
         return false;
-    }
-
-    private Class<?>[] convertParametersType(String[] paramStrings) throws ClassNotFoundException{
-        if (paramStrings != null && paramStrings.length > 0) {
-            Class<?>[] result = new Class[paramStrings.length];
-            for (int i = 0; i < paramStrings.length; i++) {
-                result[i] = getType(paramStrings[i]);
-            }
-            return result;
-        }
-        return null;
-    }
-
-    private Class getType(String className) throws ClassNotFoundException{
-        if (!className.contains(".")) {
-            return getPrimitiveType(className);
-        } else {
-            return Class.forName(className);
-        }
-    }
-
-    private Class getPrimitiveType(String name)
-    {
-        if (name.equals("byte")) return byte.class;
-        if (name.equals("short")) return short.class;
-        if (name.equals("int")) return int.class;
-        if (name.equals("long")) return long.class;
-        if (name.equals("char")) return char.class;
-        if (name.equals("float")) return float.class;
-        if (name.equals("double")) return double.class;
-        if (name.equals("boolean")) return boolean.class;
-        if (name.equals("void")) return void.class;
-
-        return Object.class;
     }
 }

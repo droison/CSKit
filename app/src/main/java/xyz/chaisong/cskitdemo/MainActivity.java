@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 
 import xyz.chaisong.cskitdemo.event.IEventChangeNightMode;
 import xyz.chaisong.mmbus.aidl.BusProvider;
@@ -66,6 +67,10 @@ public class MainActivity extends AppCompatActivity implements IEventChangeNight
 **/
 
         registerBus();
+
+        WebView webView = (WebView) findViewById(R.id.webview);
+
+        webView.loadUrl("http://app3.qdaily.com/app3/articles/35915.html");
     }
 
     public void sendBus(View view) {

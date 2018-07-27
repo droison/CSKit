@@ -33,6 +33,20 @@ public class EventHolder implements Parcelable {
         this.mArgs = args;
     }
 
+    public EventHolder(String className, String methodName, Class<?>[] parameterTypes, Object[] args) {
+        this.mClassName = className;
+        this.mMethodName = methodName;
+
+        if (parameterTypes != null && parameterTypes.length > 0) {
+            this.mParameterTypesName = new String[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                mParameterTypesName[i] = parameterTypes[i].getName();
+            }
+        }
+
+        this.mArgs = args;
+    }
+
     protected EventHolder(Parcel in) {
         mClassName = in.readString();
         mMethodName = in.readString();
@@ -113,5 +127,38 @@ public class EventHolder implements Parcelable {
                 ", mParameterTypesName=" + mParameterTypesName +
                 ", mArgs=" + mArgs +
                 '}';
+    }
+
+    public Class<?>[] getParametersType() throws ClassNotFoundException{
+        if (mParameterTypesName != null && mParameterTypesName.length > 0) {
+            Class<?>[] result = new Class[mParameterTypesName.length];
+            for (int i = 0; i < mParameterTypesName.length; i++) {
+                result[i] = getType(mParameterTypesName[i]);
+            }
+            return result;
+        }
+        return null;
+    }
+
+    private Class getType(String className) throws ClassNotFoundException{
+        if (!className.contains(".")) {
+            return getPrimitiveType(className);
+        } else {
+            return Class.forName(className);
+        }
+    }
+
+    private Class getPrimitiveType(String name) {
+        if (name.equals("byte")) return byte.class;
+        if (name.equals("short")) return short.class;
+        if (name.equals("int")) return int.class;
+        if (name.equals("long")) return long.class;
+        if (name.equals("char")) return char.class;
+        if (name.equals("float")) return float.class;
+        if (name.equals("double")) return double.class;
+        if (name.equals("boolean")) return boolean.class;
+        if (name.equals("void")) return void.class;
+
+        return Object.class;
     }
 }
